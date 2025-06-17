@@ -12,7 +12,10 @@ const app = express();
 
 // 中間件
 app.use(cors({
-  origin: config.cors.origin
+  origin: config.cors.origin,
+  credentials: config.cors.credentials,
+  methods: config.cors.methods,
+  allowedHeaders: config.cors.allowedHeaders
 }));
 // 增加請求體大小限制，確保長文本回應能夠處理
 app.use(express.json({ limit: '50mb' }));
@@ -27,6 +30,14 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+// 處理預檢請求
+app.options('*', cors({
+  origin: config.cors.origin,
+  credentials: config.cors.credentials,
+  methods: config.cors.methods,
+  allowedHeaders: config.cors.allowedHeaders
+}));
 
 // 路由
 app.use('/api', routes);

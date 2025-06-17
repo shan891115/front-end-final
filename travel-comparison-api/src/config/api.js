@@ -15,6 +15,9 @@ module.exports = {
       'https://front-end-final-tawny.vercel.app',
       'https://final-project-backend-blond.vercel.app'
     ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
   },
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
