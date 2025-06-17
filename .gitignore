@@ -59,7 +59,6 @@ launch-config.json
 # Improved/temporary versions
 improved-*.js
 *-fixed.js
-*-final.js
 
 # Development documentation and temporary files
 fix-summary.txt
