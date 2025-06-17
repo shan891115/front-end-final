@@ -20,10 +20,17 @@ console.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? '已設定' : '未�
 // 啟動服務器（移除 Firebase 連接測試以避免阻塞）
 console.log('正在啟動服務器...');
 
-app.listen(PORT, () => {
-  console.log(`✅ Server is running on port ${PORT}`);
-  console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// 對於 Vercel，導出 app 而不是啟動監聽
+if (process.env.VERCEL) {
+  // 在 Vercel 環境中，直接導出 app
+  module.exports = app;
+} else {
+  // 在本地環境中，啟動服務器
+  app.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
+    console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
 
 // 可選：異步測試 Firebase 連接，但不阻塞服務器啟動
 setTimeout(async () => {
