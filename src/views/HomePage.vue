@@ -164,10 +164,9 @@
         </router-link>
       </div>
     </section>
-    
-    <!-- 詳情彈出視窗 -->
+      <!-- 詳情彈出視窗 -->
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeModal">
-      <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+      <div class="bg-white rounded-lg max-w-3xl w-full mx-4 max-h-[95vh] overflow-y-auto" @click.stop>
         <div class="p-6">
           <!-- 關閉按鈕 -->
           <div class="flex justify-between items-center mb-4 pb-2">
