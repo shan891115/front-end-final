@@ -1,5 +1,10 @@
 require('dotenv').config();
 
+// 確保生產環境設置
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'production';
+}
+
 const express = require('express');
 const app = require('./src/app');
 
