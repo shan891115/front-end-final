@@ -2,35 +2,32 @@ require('dotenv').config();
 
 const express = require('express');
 const app = require('./src/app');
-const { testFirebaseConnection } = require('./src/firebase/testConnection');
 
 const PORT = process.env.PORT || 3000;
 
 // 調試：檢查環境變數是否正確載入
 console.log('環境變數檢查:');
 console.log('PORT:', process.env.PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('FIRECRAWL_API_KEY:', process.env.FIRECRAWL_API_KEY ? '已設定' : '未設定');
 console.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? '已設定' : '未設定');
 
-// 測試 Firebase 連接
-async function startServer() {
-  try {
-    // 在啟動前進行 Firebase 連接測試
-    await testFirebaseConnection();
-    
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error('服務器啟動錯誤:', error);
-    console.error('Firebase 連接失敗，請檢查您的配置和服務帳號設置。');
-    console.error('您仍然可以使用其他功能，但儲存比較數據可能會失敗。');
-    
-    // 即使 Firebase 連接失敗，也啟動服務器
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT} (Firebase 連接失敗)`);
-    });
-  }
-}
+// 啟動服務器（移除 Firebase 連接測試以避免阻塞）
+console.log('正在啟動服務器...');
 
-startServer();
+app.listen(PORT, () => {
+  console.log(`✅ Server is running on port ${PORT}`);
+  console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// 可選：異步測試 Firebase 連接，但不阻塞服務器啟動
+setTimeout(async () => {
+  try {
+    const { testFirebaseConnection } = require('./src/firebase/testConnection');
+    await testFirebaseConnection();
+    console.log('✅ Firebase 連接測試成功');
+  } catch (error) {
+    console.warn('⚠️  Firebase 連接測試失敗:', error.message);
+    console.warn('⚠️  Firebase 相關功能可能無法使用，但其他功能正常');
+  }
+}, 1000);
