@@ -1,0 +1,83 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Environment variables in subdirectories
+*/.env
+*/.env.*
+
+# Firebase config (if contains sensitive keys)
+firebase-config.js
+
+# Test files and debugging scripts
+*test*.js
+*test*.mjs  
+*test*.html
+*debug*.js
+analyze-*.js
+clear-*.html
+launch-*.bat
+launch-*.ps1
+start-servers.js
+launch-config.json
+
+# Improved/temporary versions
+improved-*.js
+*-fixed.js
+*-final.js
+
+# Development documentation and temporary files
+fix-summary.txt
+CORS_*.md
+FIREBASE_*_FIX.md
+FIREBASE_*_UPDATE.md
+*修復*.md
+*問題*.md
+*改進*.md
+*說明*.md
+
+# Firebase rules (if sensitive)
+firebase-firestore-rules*.txt
+firebase-storage-rules*.txt
+
+# API test files
+travel-comparison-api/test-*.js
+
+# Photo category demo and test pages
+photo-category-demo.html
+attraction-category-test.html

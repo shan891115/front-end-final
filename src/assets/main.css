@@ -1,0 +1,15 @@
+@import './base.css';
+@import "tailwindcss";
+
+#app {
+  width: 100%;
+  font-weight: normal;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+/* 移除了對body和#app的媒體查詢樣式 */

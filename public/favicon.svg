@@ -1,0 +1,25 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 - 添加圓角 -->
+  <rect width="200" height="200" fill="#e8f5e9" rx="40" ry="40"/>
+  
+  <!-- 地圖圖示 (簡化版三折地圖) -->
+  <polygon id="map" points="40,150 60,60 100,80 130,50 160,140 130,120 100,150 70,130" 
+           fill="#a5d6a7" stroke="#388e3c" stroke-width="2"/>
+
+  <!-- 地圖內部線條 (模擬路線/區塊) - 加粗線條 -->
+  <line x1="60" y1="60" x2="100" y2="80" stroke="#2e7d32" stroke-width="2" />
+  <line x1="100" y1="80" x2="130" y2="50" stroke="#2e7d32" stroke-width="2" />
+  <line x1="70" y1="130" x2="100" y2="150" stroke="#2e7d32" stroke-width="2" />
+  <line x1="100" y1="150" x2="130" y2="120" stroke="#2e7d32" stroke-width="2" />
+  
+  <!-- 虛線路徑 - 調整虛線間距 -->
+  <line x1="60" y1="60" x2="70" y2="130" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6,4"/>
+  <line x1="100" y1="80" x2="130" y2="120" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6,4"/>
+
+  <!-- 放大鏡 -->
+  <circle cx="140" cy="60" r="20" fill="none" stroke="#2e7d32" stroke-width="5"/>
+  <line x1="152" y1="72" x2="170" y2="90" stroke="#2e7d32" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- 放大鏡內的點 -->
+  <circle cx="140" cy="60" r="5" fill="#2e7d32"/>
+</svg> 
