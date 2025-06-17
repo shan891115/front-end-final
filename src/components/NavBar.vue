@@ -1,10 +1,10 @@
 <template>
-    <nav class="bg-white shadow-md flex justify-center">
+    <nav class="bg-white shadow-md flex justify-center">        
         <div class="container mx-auto px-4 lg:px-10">
-            <div class="flex justify-between items-center py-4">
+            <div class="flex items-center justify-between gap-60 py-4">
                 <!-- Logo 區域 -->
                 <div class="flex items-center">
-                    <router-link to="/" class="flex items-center">
+                    <router-link to="/" class="flex items-center whitespace-nowrap">
                         <svg width="40" height="40" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="lg:w-[50px] lg:h-[50px]">
                             <!-- 背景 - 添加圓角 -->
                             <rect width="200" height="200" fill="#e8f5e9" rx="40" ry="40"/>
@@ -35,70 +35,73 @@
                     </router-link>
                 </div>
 
-                <!-- 桌面版導航鏈接 - 隱藏在手機版 -->
-                <div class="hidden lg:flex items-center space-x-8">
-                    <router-link 
-                        to="/" 
-                        class="text-gray-700 hover:text-green-600 transition-colors font-medium px-5 py-2 rounded-md hover:bg-green-50"
-                    >
-                        首頁
-                    </router-link>
-                    <router-link 
-                        to="/compare" 
-                        class="text-gray-700 hover:text-green-600 transition-colors font-medium px-5 py-2 rounded-md hover:bg-green-50"
-                    >
-                        比比看
-                    </router-link>
-                    <router-link 
-                        to="/advice" 
-                        class="text-gray-700 hover:text-green-600 transition-colors font-medium px-5 py-2 rounded-md hover:bg-green-50"
-                    >
-                        聽建議
-                    </router-link>
-                    <router-link 
-                        to="/photos" 
-                        class="text-gray-700 hover:text-green-600 transition-colors font-medium px-5 py-2 rounded-md hover:bg-green-50"
-                    >
-                        照片牆
-                    </router-link>
-                </div>
-
-                <!-- 右側區域 -->
-                <div class="flex items-center space-x-4">
-                    <!-- 桌面版登入/登出按鈕 -->
-                    <div class="hidden lg:block">
-                        <template v-if="isAuthenticated">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-gray-700 text-sm">{{ userEmail }}</span>
-                                <button 
-                                    @click="handleLogout" 
-                                    class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-                                >
-                                    登出
-                                </button>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <router-link 
-                                to="/login" 
-                                class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-                            >
-                                登入
-                            </router-link>
-                        </template>
+                <!-- 右側區域：導航欄和登入按鈕 -->
+                <div class="flex items-center ml-auto space-x-8 gap-8 whitespace-nowrap">
+                    <!-- 桌面版導航鏈接 -->
+                    <div class="hidden lg:flex items-center space-x-8">
+                        <router-link 
+                            to="/" 
+                            class="text-gray-700 hover:text-green-600 transition-colors font-medium px-4 py-2 rounded-md hover:bg-green-50"
+                        >
+                            首頁
+                        </router-link>
+                        <router-link 
+                            to="/compare" 
+                            class="text-gray-700 hover:text-green-600 transition-colors font-medium px-4 py-2 rounded-md hover:bg-green-50"
+                        >
+                            比比看
+                        </router-link>
+                        <router-link 
+                            to="/advice" 
+                            class="text-gray-700 hover:text-green-600 transition-colors font-medium px-4 py-2 rounded-md hover:bg-green-50"
+                        >
+                            聽建議
+                        </router-link>
+                        <router-link 
+                            to="/photos" 
+                            class="text-gray-700 hover:text-green-600 transition-colors font-medium px-4 py-2 rounded-md hover:bg-green-50"
+                        >
+                            照片牆
+                        </router-link>
                     </div>
 
-                    <!-- 手機版漢堡選單按鈕 -->
-                    <button 
-                        @click="toggleMobileMenu" 
-                        class="lg:hidden flex items-center justify-center w-10 h-10 rounded-md hover:bg-gray-100 transition-colors"
-                        aria-label="開啟選單"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path v-if="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <!-- 登入/登出和漢堡選單區域 -->
+                    <div class="flex items-center space-x-4">
+                        <!-- 桌面版登入/登出按鈕 -->
+                        <div class="hidden lg:block">
+                            <template v-if="isAuthenticated">
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-gray-700 text-sm pr-4">{{ userEmail }}</span>
+                                    <button 
+                                        @click="handleLogout" 
+                                        class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                                    >
+                                        登出
+                                    </button>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <router-link 
+                                    to="/login" 
+                                    class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                                >
+                                    登入
+                                </router-link>
+                            </template>
+                        </div>
+
+                        <!-- 手機版漢堡選單按鈕 -->
+                        <button 
+                            @click="toggleMobileMenu" 
+                            class="lg:hidden flex items-center justify-center w-10 h-10 rounded-md hover:bg-gray-100 transition-colors"
+                            aria-label="開啟選單"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path v-if="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
