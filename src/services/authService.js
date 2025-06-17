@@ -30,6 +30,19 @@ console.log('STORAGE_BUCKET 存在:', !!import.meta.env.VITE_FIREBASE_STORAGE_BU
 console.log('MESSAGING_SENDER_ID 存在:', !!import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID);
 console.log('APP_ID 存在:', !!import.meta.env.VITE_FIREBASE_APP_ID);
 
+// 詳細調試信息
+console.log('所有環境變數:', import.meta.env);
+console.log('Firebase 配置對象:', firebaseConfig);
+
+// 檢查是否有空值
+Object.entries(firebaseConfig).forEach(([key, value]) => {
+  if (!value) {
+    console.error(`❌ ${key} 為空或未定義`);
+  } else {
+    console.log(`✅ ${key} 已設置`);
+  }
+});
+
 // 身份驗證狀態
 const currentUser = ref(null);
 const isAuthenticated = ref(false);
