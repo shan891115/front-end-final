@@ -3,6 +3,20 @@ const router = express.Router();
 const aiService = require('../services/aiService');
 const firebaseService = require('../services/firebaseService');
 
+// 為所有 AI 路由添加 CORS 中間件
+router.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://front-end-final-tawny.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
 // 從行程內容提取必要資訊的輔助函數
 function extractInfoFromItinerary(content) {
   if (!content) return {};
@@ -1713,6 +1727,12 @@ function intelligentMergeContent(originalContent, newContent, analysis) {
 
 // 儲存行程到 Firebase
 router.post('/save-itinerary', async (req, res) => {
+  // 設置 CORS 標頭
+  res.header('Access-Control-Allow-Origin', 'https://front-end-final-tawny.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
   try {
     const itineraryData = req.body;
     

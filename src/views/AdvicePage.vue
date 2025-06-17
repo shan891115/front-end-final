@@ -1792,9 +1792,9 @@ export default {
             result.days = '13+';
           }
         }
-        
-        // 嘗試判斷地區
-        const regionPatterns = {          'asia': /亞洲|東亞|東南亞|南亞/i,
+          // 嘗試判斷地區
+        const regionPatterns = {
+          'asia': /亞洲|東亞|東南亞|南亞/i,
           'europe': /歐洲|西歐|東歐|南歐|北歐/i,
           'america': /美洲|北美|南美|拉丁美洲/i,
           'oceania': /大洋洲|澳洲/i,
