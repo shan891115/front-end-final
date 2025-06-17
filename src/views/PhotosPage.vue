@@ -1,29 +1,62 @@
 <template>
-  <div class="min-h-screen flex flex-col">
-    <!-- 頁頭區域 -->
+  <div class="min-h-screen flex flex-col">    <!-- 頁頭區域 -->
     <section class="flex justify-center bg-gradient-to-r from-green-500 to-teal-600 text-white py-16">
       <div class="container mx-auto px-4 text-center">
-        <h2 class="text-4xl font-bold mb-4 pb-2">旅遊照片牆</h2>
-        <p class="text-xl mb-4">透過美麗的照片探索世界各地的風景</p>
+        <h2 class="text-3xl lg:text-4xl font-bold mb-4 pb-2">旅遊照片牆</h2>
+        <p class="text-lg lg:text-xl mb-4">透過美麗的照片探索世界各地的風景</p>
       </div>
     </section>
 
     <!-- 主要內容區域 -->
-    <section class="flex-grow flex justify-center py-16 bg-gray-50">
-      <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12 pb-4">記錄您的旅途風景</h2>        <!-- 照片分類選項 -->
-        <div class="flex flex-wrap justify-center gap-4 mb-10 pb-4">
-          <button 
-            v-for="category in photoCategories" 
-            :key="category.id" 
-            @click="selectCategory(category.id)"
-            class="px-6 py-2 rounded-full hover:bg-green-600 text-slate-600 transition-colors"
-            :class="selectedCategoryId === category.id 
-              ? 'bg-green-500 text-white' 
-              : 'bg-white text-stone-400 border border-gray-300 hover:bg-emerald-700 hover:text-slate-200'"
-          >
-            {{ category.name }}
-          </button>
+    <section class="flex-grow flex justify-center py-16 bg-gray-50">      <div class="container mx-auto px-4">
+        <h2 class="text-2xl lg:text-3xl font-bold text-center mb-12 pb-4">記錄您的旅途風景</h2>        <!-- 照片分類選項 -->
+        <div class="flex flex-wrap justify-center gap-4 mb-10 pb-4 md:gap-4 lg:gap-4">
+          <!-- 手機版：使用 flex 佈局實現上3下2的排列，每個按鈕寬度一致 -->
+          <div class="flex flex-col items-center gap-3 w-full md:hidden">
+            <!-- 上排3個按鈕 -->
+            <div class="flex justify-center gap-3 w-full">
+              <button 
+                v-for="category in photoCategories.slice(0, 3)" 
+                :key="category.id" 
+                @click="selectCategory(category.id)"
+                class="w-24 px-2 py-2 rounded-full hover:bg-green-600 text-slate-600 transition-colors text-xs"
+                :class="selectedCategoryId === category.id 
+                  ? 'bg-green-500 text-white' 
+                  : 'bg-white text-stone-400 border border-gray-300 hover:bg-emerald-700 hover:text-slate-200'"
+              >
+                {{ category.name }}
+              </button>
+            </div>
+            <!-- 下排2個按鈕 -->
+            <div class="flex justify-center gap-3 w-full">
+              <button 
+                v-for="category in photoCategories.slice(3)" 
+                :key="category.id" 
+                @click="selectCategory(category.id)"
+                class="w-24 px-2 py-2 rounded-full hover:bg-green-600 text-slate-600 transition-colors text-xs"
+                :class="selectedCategoryId === category.id 
+                  ? 'bg-green-500 text-white' 
+                  : 'bg-white text-stone-400 border border-gray-300 hover:bg-emerald-700 hover:text-slate-200'"
+              >
+                {{ category.name }}
+              </button>
+            </div>
+          </div>
+          
+          <!-- 平板和桌面版：保持原有的 flex 佈局 -->
+          <div class="hidden md:flex flex-wrap justify-center gap-4">
+            <button 
+              v-for="category in photoCategories" 
+              :key="category.id" 
+              @click="selectCategory(category.id)"
+              class="min-w-[120px] px-6 py-2 rounded-full hover:bg-green-600 text-slate-600 transition-colors"
+              :class="selectedCategoryId === category.id 
+                ? 'bg-green-500 text-white' 
+                : 'bg-white text-stone-400 border border-gray-300 hover:bg-emerald-700 hover:text-slate-200'"
+            >
+              {{ category.name }}
+            </button>
+          </div>
         </div>
         
         <!-- 照片管理工具列 -->
@@ -212,10 +245,9 @@
               </button>
             </div>
           </div>
-          
-          <!-- 上傳照片界面 -->
+            <!-- 上傳照片界面 -->
           <div v-if="showUploadInterface" class="mt-8 bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-2xl font-bold mb-4">上傳照片與心得</h3>
+            <h3 class="text-xl lg:text-2xl font-bold mb-4">上傳照片與心得</h3>
             
             <!-- 行程天數選擇 -->
             <div class="mb-4">
@@ -257,11 +289,11 @@
                   <p class="text-sm text-gray-600 mt-1">{{ attraction.description }}</p>
                 </div>
               </div>
-            </div>              
+            </div>                
             <!-- 照片上傳區域 -->
             <div v-if="selectedAttraction" class="mb-6 bg-green-50 p-5 rounded-lg border border-green-100">
               <div class="flex justify-between items-center mb-4 pb-2">
-                <h4 class="font-semibold text-gray-800">照片與心得</h4>
+                <h4 class="text-base lg:text-lg font-semibold text-gray-800">照片與心得</h4>
                 <span class="text-sm text-green-700 bg-green-100 px-3 py-1 rounded-full">{{ selectedAttraction.name }}</span>
               </div>
               
@@ -399,9 +431,11 @@
                 </button>
               </div>
             </div>
-          </div>        </div>
+          </div>        
+          </div>
       </div>
-    </section>    <!-- 照片詳情彈窗 -->
+    </section>    
+    <!-- 照片詳情彈窗 -->
     <div v-if="selectedPhotoForDetail" class="fixed inset-0 bg-teal-900 bg-opacity-75 flex items-center justify-center z-50 p-4" @click="closePhotoDetail">
       <div class="bg-white rounded-2xl max-w-4xl max-h-full overflow-auto" @click.stop>
         <div class="relative">
@@ -418,39 +452,37 @@
           </div>
 
           <!-- 詳情內容 -->
-          <div class="p-6">
-            <!-- 標題和標籤 -->
+          <div class="p-6">            
+          <!-- 標題和標籤 -->
             <div class="mb-4">
-              <h2 class="text-2xl font-bold text-gray-800 mb-3">
+              <h2 class="text-xl lg:text-2xl font-bold text-gray-800 mb-3">
                 {{ selectedPhotoForDetail.attraction?.name || '美麗景色' }}
               </h2>
 
               <!-- 標籤組 -->
               <div class="flex flex-wrap gap-2 mb-4 pt-2">
-                <span v-if="selectedPhotoForDetail.primaryTag" class="px-4 py-2 bg-blue-100 text-blue-700 text-sm rounded-full font-medium">
+                <span v-if="selectedPhotoForDetail.primaryTag" class="px-3 lg:px-4 py-1 lg:py-2 bg-blue-100 text-blue-700 text-xs lg:text-sm rounded-full font-medium">
                   🌍 {{ selectedPhotoForDetail.primaryTag }}
                 </span>
 
-                <span v-if="selectedPhotoForDetail.secondaryTag" class="px-4 py-2 bg-green-100 text-green-700 text-sm rounded-full font-medium">
+                <span v-if="selectedPhotoForDetail.secondaryTag" class="px-3 lg:px-4 py-1 lg:py-2 bg-green-100 text-green-700 text-xs lg:text-sm rounded-full font-medium">
                    {{ selectedPhotoForDetail.secondaryTag }}
                 </span>
 
-                <span class="px-4 py-2 bg-gray-100 text-gray-600 text-sm rounded-full">
+                <span class="px-3 lg:px-4 py-1 lg:py-2 bg-gray-100 text-gray-600 text-xs lg:text-sm rounded-full">
                   🏷️ {{ getCategoryName(selectedPhotoForDetail.category) }}
                 </span>
               </div>
-            </div>
-
+            </div>            
             <!-- 心得內容 -->
             <div v-if="selectedPhotoForDetail.notes" class="mb-4 py-2">
-              <h3 class="text-lg font-semibold text-gray-700 mb-2 py-2">📝 旅行心得</h3>
-              <p class="text-gray-600 leading-relaxed whitespace-pre-wrap pl-4 pb-2">{{ selectedPhotoForDetail.notes }}</p>
-            </div>
-
+              <h3 class="text-base lg:text-lg font-semibold text-gray-700 mb-2 py-2">📝 旅行心得</h3>
+              <p class="text-sm lg:text-base text-gray-600 leading-relaxed whitespace-pre-wrap pl-4 pb-2">{{ selectedPhotoForDetail.notes }}</p>
+            </div>            
             <!-- 照片資訊 -->
             <div class="border-t pt-4 mt-4">
-              <h3 class="text-base font-semibold text-gray-700 mb-2 pb-2">📷 照片資訊</h3>
-              <div class="grid grid-cols-2 gap-4 text-sm text-gray-600">
+              <h3 class="text-sm lg:text-base font-semibold text-gray-700 mb-2 pb-2">📷 照片資訊</h3>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 text-xs lg:text-sm text-gray-600">
                 <div>
                   <span class="font-medium">◎ 上傳時間：</span>
                   {{ formatDate(selectedPhotoForDetail.uploadDate) }}
@@ -468,7 +500,7 @@
                 <svg class="w-6 h-6" :class="selectedPhotoForDetail.isLiked ? 'text-red-500' : 'text-gray-400'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
                 </svg>
-                <span class="text-gray-700 pl-2">{{ selectedPhotoForDetail.isLiked ? '已喜歡' : '喜歡' }}</span>
+                <span class="text-sm lg:text-base text-gray-700 pl-2">{{ selectedPhotoForDetail.isLiked ? '已喜歡' : '喜歡' }}</span>
               </button>
             </div>
           </div>
@@ -479,10 +511,9 @@
     <!-- 照片管理彈窗 -->
     <div v-if="showPhotoManagement" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click="showPhotoManagement = false">
       <div class="bg-white rounded-2xl max-w-2xl w-full max-h-full overflow-auto" @click.stop>
-        <div class="p-6">
-          <!-- 標題 -->
+        <div class="p-6">          <!-- 標題 -->
           <div class="flex justify-between items-center mb-6 pb-4">
-            <h2 class="text-2xl font-bold text-gray-800">🛠️ 照片管理</h2>
+            <h2 class="text-xl lg:text-2xl font-bold text-gray-800">🛠️ 照片管理</h2>
             <button @click="showPhotoManagement = false" class="p-2 hover:bg-gray-100 rounded-full">
               <svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

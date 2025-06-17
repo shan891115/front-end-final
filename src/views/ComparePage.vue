@@ -1,10 +1,9 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50">
-    <!-- 頁頭區域 - 使用#4caf50背景 -->
+  <div class="min-h-screen flex flex-col bg-gray-50">    <!-- 頁頭區域 - 使用#4caf50背景 -->
     <section class="flex justify-center py-16 bg-gradient-to-r from-[#66cdaa] to-[#3cb371] text-white">
       <div class="container mx-auto px-4 text-center">
-        <h2 class="text-4xl font-light mb-6 tracking-tight pb-2">旅遊目的地比較</h2>
-        <p class="text-xl font-light mb-4 opacity-90">使用AI智能分析工具比較不同旅遊目的地，做出最適合您的選擇</p>
+        <h2 class="text-3xl lg:text-4xl font-light mb-6 tracking-tight pb-2">旅遊目的地比較</h2>
+        <p class="text-lg lg:text-xl font-light mb-4 opacity-90">使用AI智能分析工具比較不同旅遊目的地，做出最適合您的選擇</p>
       </div>
     </section>
 
@@ -17,10 +16,8 @@
           </div>
           <div v-else class="status-message success">
             <p><strong>服務狀態：</strong>服務連接正常。</p>
-          </div>
-
-          <form @submit.prevent="compareDestinations" class="form-section">
-            <h2>輸入旅遊網址進行比較</h2>
+          </div>          <form @submit.prevent="compareDestinations" class="form-section">
+            <h2 class="text-lg lg:text-xl">輸入旅遊網址進行比較</h2>
             <div v-for="(item, index) in travelUrls" :key="index" class="url-input-group">
               <div class="input-row">
                 <input type="url" v-model="item.url" placeholder="例：https://www.example.com/travel-article" required class="url-input">
@@ -60,10 +57,8 @@
           <div v-if="isLoading && !comparisonResult" class="loading-indicator">
             <p>請稍候，AI 正在努力為您分析比較...</p>
             <div class="spinner"></div>
-          </div>
-
-          <div v-if="parsedComparison && parsedComparison.comparison" class="results-section">
-            <h2 class="text-xl font-bold mb-4">比較結果分析</h2>
+          </div>          <div v-if="parsedComparison && parsedComparison.comparison" class="results-section">
+            <h2 class="text-lg lg:text-xl font-bold mb-4">比較結果分析</h2>
 
             <div v-if="parsedComparison.comparison.recommendation" class="recommendation-box">
               <h3>AI 總體推薦</h3>
@@ -98,7 +93,7 @@
             </div>
 
             <div v-if="parsedComparison.comparison.summary" class="summary-box">
-              <h3 class="text-lg font-bold mb-4 pb-2">各項總結</h3>
+              <h3 class="text-base lg:text-lg font-bold mb-4 pb-2">各項總結</h3>
               <!-- 當 summary 是字符串時直接顯示 -->
               <p v-if="typeof parsedComparison.comparison.summary === 'string'">
                 {{ parsedComparison.comparison.summary }}
@@ -113,7 +108,7 @@
 
             <!-- 優缺點比較 -->
             <div v-if="parsedComparison.comparison.pros_cons" class="pros-cons-box">
-              <h3 class="text-lg font-bold mb-4 pb-2">優缺點分析</h3>
+              <h3 class="text-base lg:text-lg font-bold mb-4 pb-2">優缺點分析</h3>
               
               <!-- 表格形式的優缺點分析 -->
               <div class="pros-cons-table-container">
@@ -167,7 +162,7 @@
           </div>
 
           <div v-if="comparisonResult" class="chat-section">
-            <h2 class="text-xl font-bold section-title">
+            <h2 class="text-lg lg:text-xl font-bold section-title">
               <svg xmlns="http://www.w3.org/2000/svg" class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="10" rx="2" />
                 <circle cx="12" cy="5" r="2" />
@@ -199,7 +194,7 @@
 
           <!-- 在表單下方添加最近比較列表 -->
           <div v-if="recentComparisons.length > 0" class="recent-comparisons">
-            <h3 class="text-lg font-bold section-title">
+            <h3 class="text-base lg:text-lg font-bold section-title">
               <svg xmlns="http://www.w3.org/2000/svg" class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
@@ -724,6 +719,25 @@ testComparison();
   gap: 10px;
   margin-bottom: 10px;
 }
+
+/* 手機版垂直排列 */
+@media (max-width: 768px) {
+  .input-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .url-input, .title-input {
+    flex: none;
+    width: 100%;
+  }
+  
+  .remove-btn {
+    align-self: flex-start;
+    margin-left: 0;
+    margin-top: 4px;
+  }
+}
 .url-input, .title-input {
   padding: 10px;
   border: 1px solid #ddd;
@@ -742,6 +756,19 @@ testComparison();
   gap: 10px;
   justify-content: flex-end;
   margin-top: 20px;
+}
+
+/* 手機版按鈕區域 */
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-actions button {
+    width: 100%;
+    padding: 12px 15px; /* 增加手機版按鈕高度 */
+  }
 }
 button {
   padding: 10px 15px;
@@ -891,7 +918,47 @@ button:disabled {
   background-color: white;
   border-radius: 8px;
   overflow: hidden;
+  min-width: 600px; /* 確保表格最小寬度 */
 }
+
+/* 手機版優缺點表格樣式 */
+@media (max-width: 768px) {
+  .pros-cons-table-container table {
+    min-width: 100%;
+    table-layout: fixed; /* 固定表格佈局 */
+  }
+  
+  .pros-cons-table-container .destination-name {
+    width: 25%; /* 目的地名稱欄位寬度 */
+    min-width: 80px;
+  }
+  
+  .pros-cons-table-container .pros-cell,
+  .pros-cons-table-container .cons-cell {
+    width: 37.5%; /* 優缺點欄位平分剩餘空間 */
+  }
+  
+  .pros-cons-table-container th,
+  .pros-cons-table-container td {
+    padding: 8px 6px; /* 減少手機版內邊距 */
+    font-size: 0.85rem; /* 縮小字體 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .pros-cons-table-container .pros-cell ul,
+  .pros-cons-table-container .cons-cell ul {
+    padding-left: 16px; /* 減少列表縮進 */
+    margin: 0;
+  }
+  
+  .pros-cons-table-container .pros-cell li,
+  .pros-cons-table-container .cons-cell li {
+    margin-bottom: 3px; /* 減少列表項間距 */
+    font-size: 0.8rem; /* 進一步縮小列表項字體 */
+  }
+}
+
 .pros-cons-table-container th, 
 .pros-cons-table-container td {
   border-bottom: 1px solid #e0e0e0;
@@ -1045,6 +1112,23 @@ button:disabled {
   display: flex;
   gap: 10px;
 }
+
+/* 手機版聊天輸入區域 */
+@media (max-width: 768px) {
+  .chat-input-form {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .chat-input {
+    width: 100%;
+  }
+  
+  .send-btn {
+    width: 100%;
+    padding: 12px 15px; /* 增加手機版按鈕高度 */
+  }
+}
 .chat-input {
   flex-grow: 1;
   padding: 10px;
@@ -1125,13 +1209,43 @@ button:disabled {
   background-color: white;
   border-radius: 8px;
   overflow: hidden;
+  min-width: 600px; /* 確保表格最小寬度 */
 }
+
+/* 手機版表格樣式 */
+@media (max-width: 768px) {
+  .comparison-table-container table {
+    min-width: 100%;
+    table-layout: fixed; /* 固定表格佈局 */
+  }
+  
+  .comparison-table-container th:first-child,
+  .comparison-table-container td:first-child {
+    width: 25%; /* 比較項目欄位寬度 */
+    min-width: 80px;
+  }
+  
+  .comparison-table-container th:not(:first-child),
+  .comparison-table-container td:not(:first-child) {
+    width: auto; /* 其他欄位平分剩餘空間 */
+  }
+  
+  .comparison-table-container th,
+  .comparison-table-container td {
+    padding: 8px 6px; /* 減少手機版內邊距 */
+    font-size: 0.85rem; /* 縮小字體 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
 .comparison-table-container th, 
 .comparison-table-container td {
   border-bottom: 1px solid #e0e0e0;
   border-right: 1px solid #e0e0e0;
   padding: 12px;
   text-align: left;
+  vertical-align: top;
 }
 
 .comparison-table-container tr:last-child td {

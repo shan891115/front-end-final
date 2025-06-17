@@ -1,18 +1,18 @@
 <template>
-  <div class="min-h-screen">
+  <div class="min-h-screen">    
     <!-- 英雄區段 -->
     <section class="flex justify-center bg-gradient-to-r from-green-500 to-teal-600 text-white py-16">
       <div class="container mx-auto px-4 text-center">
-        <h2 class="text-4xl font-bold mb-4 pb-2">探索世界的美麗之旅</h2>
-        <p class="text-xl mb-8 pb-4">找到最適合你的旅遊目的地，創造難忘的回憶</p>        <button @click="scrollToDestinations" class="bg-white text-green-600 px-6 py-3 rounded-lg font-bold hover:bg-green-100 transition-colors">
+        <h2 class="text-3xl lg:text-4xl font-bold mb-4 pb-2">探索世界的美麗之旅</h2>
+        <p class="text-lg lg:text-xl mb-8 pb-4">找到最適合你的旅遊目的地，創造難忘的回憶</p>        <button @click="scrollToDestinations" class="bg-white text-green-600 px-6 py-3 rounded-lg font-bold hover:bg-green-100 transition-colors">
           開始探索
         </button>
       </div>
-    </section>      
+    </section>    
     <!-- 熱門目的地區段 -->
     <section id="destinations" class="flex justify-center py-16 bg-gray-100 relative">
       <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12 pb-4">熱門旅遊目的地</h2>
+        <h2 class="text-2xl lg:text-3xl font-bold text-center mb-12 pb-4">熱門旅遊目的地</h2>
           <!-- 卡片容器 - 限制為固定寬度以顯示恰好3張卡片 -->
         <div class="destinations-group group relative overflow-hidden max-w-8xl mx-auto flex justify-center">
           <!-- 左側箭頭 -->
@@ -26,10 +26,10 @@
               <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow flex-shrink-0 w-[calc(33.333%-16px)] min-w-[280px] snap-center">
                 <div class="h-56 overflow-hidden">
                   <img src="/images/destinations/海灘.jpg.webp" alt="海灘度假勝地" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                </div>
+                </div>                
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">海灘度假勝地</h3>
-                  <p class="text-gray-700 pb-4">享受陽光、沙灘和海浪，放鬆身心的完美去處。</p>
+                  <h3 class="font-bold text-lg lg:text-xl mb-3">海灘度假勝地</h3>
+                  <p class="text-sm lg:text-base text-gray-700 pb-4">享受陽光、沙灘和海浪，放鬆身心的完美去處。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('beach')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
                       查看詳情
@@ -41,10 +41,10 @@
               <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow flex-shrink-0 w-[calc(33.333%-16px)] min-w-[280px] snap-center">
                 <div class="h-56 overflow-hidden">
                   <img src="/images/destinations/山脈風景.jpg" alt="山區探險行程" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                </div>
+                </div>                
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">山區探險行程</h3>
-                  <p class="text-gray-700 pb-4">探索壯麗的山脈風景，體驗刺激的戶外活動。</p>
+                  <h3 class="font-bold text-lg lg:text-xl mb-3">山區探險行程</h3>
+                  <p class="text-sm lg:text-base text-gray-700 pb-4">探索壯麗的山脈風景，體驗刺激的戶外活動。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('mountain')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
                       查看詳情
@@ -56,10 +56,10 @@
               <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow flex-shrink-0 w-[calc(33.333%-16px)] min-w-[280px] snap-center">
                 <div class="h-56 overflow-hidden">
                   <img src="/images/destinations/歷史博物館.png" alt="文化城市之旅" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                </div>
+                </div>                
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">文化城市之旅</h3>
-                  <p class="text-gray-700 pb-4">沉浸在豐富的歷史和文化中，參觀博物館和歷史建築。</p>
+                  <h3 class="font-bold text-lg lg:text-xl mb-3">文化城市之旅</h3>
+                  <p class="text-sm lg:text-base text-gray-700 pb-4">沉浸在豐富的歷史和文化中，參觀博物館和歷史建築。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('city')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
                       查看詳情
@@ -71,10 +71,10 @@
               <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow flex-shrink-0 w-[calc(33.333%-16px)] min-w-[280px] snap-center">
                 <div class="h-56 overflow-hidden">
                   <img src="/images/destinations/古代遺跡.jpg" alt="古老神秘遺跡" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                </div>
+                </div>                
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">古老神秘遺跡</h3>
-                  <p class="text-gray-700 pb-4">探索古代文明的遺跡，了解歷史文化的演變與故事。</p>
+                  <h3 class="font-bold text-lg lg:text-xl mb-3">古老神秘遺跡</h3>
+                  <p class="text-sm lg:text-base text-gray-700 pb-4">探索古代文明的遺跡，了解歷史文化的演變與故事。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('ruins')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
                       查看詳情
@@ -86,10 +86,9 @@
               <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow flex-shrink-0 w-[calc(33.333%-16px)] min-w-[280px] snap-center">
                 <div class="h-56 overflow-hidden">
                   <img src="/images/destinations/熱帶島嶼.jpg" alt="島嶼冒險之旅" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                </div>
-                <div class="p-8">
-                  <h3 class="font-bold text-xl mb-3">島嶼冒險之旅</h3>
-                  <p class="text-gray-700 pb-4">探索熱帶島嶼的奇特風光，體驗獨特的自然景觀與文化。</p>
+                </div>                <div class="p-8">
+                  <h3 class="font-bold text-lg lg:text-xl mb-3">島嶼冒險之旅</h3>
+                  <p class="text-sm lg:text-base text-gray-700 pb-4">探索熱帶島嶼的奇特風光，體驗獨特的自然景觀與文化。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('island')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
                       查看詳情
@@ -107,23 +106,20 @@
           </button>
         </div>
       </div>
-    </section>
-
-    <!-- 特色服務區段 -->
+    </section>    <!-- 特色服務區段 -->
     <section class="flex justify-center py-16">
       <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12">我們的特色服務</h2>
+        <h2 class="text-2xl lg:text-3xl font-bold text-center mb-12">我們的特色服務</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- 服務 1 -->
           <div class="text-center p-6 flex flex-col items-center">
-                          <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin: 0 auto;">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
-              </div>
-            <h3 class="text-xl font-bold mb-2 pt-4">量身定制</h3>
-            <p class="text-gray-600">根據您的偏好和預算，為您打造完美的旅行計劃。</p>
+              </div>            <h3 class="text-lg lg:text-xl font-bold mb-2 pt-4">量身定制</h3>
+            <p class="text-sm lg:text-base text-gray-600">根據您的偏好和預算，為您打造完美的旅行計劃。</p>
           </div>
 
           <!-- 服務 2 -->
@@ -132,30 +128,29 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin: 0 auto;">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
               </svg>
-            </div>
-            <h3 class="text-xl font-bold mb-2 pt-4">最佳價格</h3>
-            <p class="text-gray-600">提供最具競爭力的價格，讓您獲得最大的價值。</p>
+            </div>            
+            <h3 class="text-lg lg:text-xl font-bold mb-2 pt-4">最佳價格</h3>
+            <p class="text-sm lg:text-base text-gray-600">提供最具競爭力的價格，讓您獲得最大的價值。</p>
           </div>
 
           <!-- 服務 3 -->
           <div class="text-center p-6 flex flex-col items-center">
-                          <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin: 0 auto;">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-              </div>
-            <h3 class="text-xl font-bold mb-2 pt-4">24h / 7d 支援</h3>
-            <p class="text-gray-600">全天候客戶支援，確保您的旅行無憂無慮。</p>
+              </div>            
+              <h3 class="text-lg lg:text-xl font-bold mb-2 pt-4">24h / 7d 支援</h3>
+            <p class="text-sm lg:text-base text-gray-600">全天候客戶支援，確保您的旅行無憂無慮。</p>
           </div>
         </div>
       </div>
     </section>
-    
-    <!-- 號召行動區段 -->
+      <!-- 號召行動區段 -->
     <section class="flex justify-center bg-gradient-to-l from-green-500 to-teal-600 text-white py-16">
       <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-4 pb-2">準備好開始您的冒險了嗎？</h2>
-        <p class="text-xl mb-8 pb-4">立即登入，獲取客製化旅程</p>
+        <h2 class="text-2xl lg:text-3xl font-bold mb-4 pb-2">準備好開始您的冒險了嗎？</h2>
+        <p class="text-lg lg:text-xl mb-8 pb-4">立即登入，獲取客製化旅程</p>
         <router-link 
           to="/login" 
           class="inline-block bg-white text-green-600 px-8 py-4 rounded-lg font-bold shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:bg-yellow-400 hover:text-gray-800 border-2 border-transparent hover:border-white"
@@ -167,10 +162,10 @@
       <!-- 詳情彈出視窗 -->
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeModal">
       <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[95vh] overflow-y-auto" @click.stop>
-        <div class="p-6">
+        <div class="p-6">          
           <!-- 關閉按鈕 -->
           <div class="flex justify-between items-center mb-4 pb-2">
-            <h2 class="text-2xl font-bold text-gray-800">{{ selectedDestination.title }}</h2>
+            <h2 class="text-xl lg:text-2xl font-bold text-gray-800">{{ selectedDestination.title }}</h2>
             <button @click="closeModal" class="text-gray-500 hover:text-gray-700 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -181,29 +176,28 @@
           <div class="h-50 rounded-lg mb-6 overflow-hidden">
             <img :src="selectedDestination.image" :alt="selectedDestination.title" class="w-full h-full object-cover">
           </div>
-          
-          <!-- 詳細內容 -->
+            <!-- 詳細內容 -->
           <div class="space-y-4">
             <div>
-              <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">景點特色</h3>
-              <p class="text-gray-700 text-sm">{{ selectedDestination.features }}</p>
+              <h3 class="text-base lg:text-lg font-semibold mb-2 text-green-600 pt-4">景點特色</h3>
+              <p class="text-gray-700 text-xs lg:text-sm">{{ selectedDestination.features }}</p>
             </div>
             
             <div>
-              <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">推薦活動</h3>
-              <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
+              <h3 class="text-base lg:text-lg font-semibold mb-2 text-green-600 pt-4">推薦活動</h3>
+              <ul class="list-disc list-inside text-gray-700 space-y-1 text-xs lg:text-sm">
                 <li v-for="activity in selectedDestination.activities" :key="activity">{{ activity }}</li>
               </ul>
             </div>
             
             <div>
-              <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">最佳旅遊時間</h3>
-              <p class="text-gray-700 text-sm">{{ selectedDestination.bestTime }}</p>
+              <h3 class="text-base lg:text-lg font-semibold mb-2 text-green-600 pt-4">最佳旅遊時間</h3>
+              <p class="text-gray-700 text-xs lg:text-sm">{{ selectedDestination.bestTime }}</p>
             </div>
             
             <div>
-              <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">預估費用</h3>
-              <p class="text-gray-700 text-sm">{{ selectedDestination.cost }}</p>
+              <h3 class="text-base lg:text-lg font-semibold mb-2 text-green-600 pt-4">預估費用</h3>
+              <p class="text-gray-700 text-xs lg:text-sm">{{ selectedDestination.cost }}</p>
             </div>
           </div>
             <!-- 動作按鈕 -->
