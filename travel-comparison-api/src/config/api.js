@@ -9,7 +9,12 @@ module.exports = {
     model: process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp'
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'https://front-end-final-tawny.vercel.app',
+      'https://final-project-backend-blond.vercel.app'
+    ],
   },
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
