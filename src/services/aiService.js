@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3333/api';
+// 根據環境自動選擇 API URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.MODE === 'development' ? 'http://localhost:3333/api' : 'https://final-project-backend-blond.vercel.app/api');
 
 const aiService = {
   async saveItineraryToFirebase(itineraryData) {

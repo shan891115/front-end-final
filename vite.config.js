@@ -21,9 +21,10 @@ export default defineConfig({
     proxy: {
       // 將所有 /api 請求代理到後端服務器
       '/api': {
-        target: 'http://localhost:3333', // 後端服務器地址，根據實際情況調整
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:3333', // 使用環境變數
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     },
     // 新增 CORS 設定
@@ -36,6 +37,17 @@ export default defineConfig({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
+  },
+  // 生產環境配置
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage']
+        }
+      }
     }
   }
 })

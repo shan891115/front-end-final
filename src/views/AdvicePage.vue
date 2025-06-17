@@ -1,29 +1,33 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-green-50">    <!-- 頁頭區域 - 使用綠色系背景 -->
+  <div class="min-h-screen flex flex-col bg-green-50">
+    <!-- 頁頭區域 - 使用綠色系背景 -->
     <section class="flex justify-center bg-gradient-to-r from-green-400 to-emerald-600 text-white py-16">
       <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl lg:text-4xl font-light mb-6 tracking-tight pb-2">旅遊建議</h2>
-        <p class="text-lg lg:text-xl font-light mb-4 opacity-90">獲取來自其他旅行者和AI的寶貴建議，規劃完美行程</p>
+        <h2 class="text-4xl font-light mb-6 tracking-tight pb-2">旅遊建議</h2>
+        <p class="text-xl font-light mb-4 opacity-90">獲取來自其他旅行者和AI的寶貴建議，規劃完美行程</p>
       </div>
     </section>
 
     <!-- 主要內容區域 -->
-    <section class="flex-grow flex justify-center py-16 bg-green-50">      <div class="container mx-auto px-4 max-w-6xl">
-        <h2 class="text-2xl lg:text-3xl font-light text-center py-4 mb-16 text-emerald-800">獲取專屬旅遊建議</h2>
+    <section class="flex-grow flex justify-center py-16 bg-green-50">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <h2 class="text-3xl font-light text-center py-4 mb-16 text-emerald-800">獲取專屬旅遊建議</h2>
         
-          <!-- 後端連線提示 - 使用更輕量的設計 -->
-        <div class="bg-teal-50 border-l-4 border-teal-300 text-teal-700 px-4 lg:px-6 py-3 lg:py-4 rounded-md mb-16 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 lg:h-5 w-4 lg:w-5 mr-2 lg:mr-3 text-teal-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+        <!-- 後端連線提示 - 使用更輕量的設計 -->
+        <div class="bg-teal-50 border-l-4 border-teal-300 text-teal-700 px-6 py-4 rounded-md mb-16 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-teal-500" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
           </svg>
-          <span class="text-xs lg:text-sm">
+          <span class="text-sm">
             <strong>提示：</strong> 若後端伺服器未啟動，系統會自動使用模擬資料。若要使用真實AI服務，請先啟動後端伺服器。
           </span>
         </div>
+        
         <!-- 其他使用者推薦 - 使用卡片式設計 -->
-          <!-- 其他使用者推薦 - 使用卡片式設計 -->
         <div class="bg-white rounded-xl shadow-sm p-8 mb-20">
-          <h3 class="text-xl lg:text-2xl font-light mb-10 text-emerald-700 pb-4">探索旅行者推薦</h3>
+          <h3 class="text-2xl font-light mb-10 text-emerald-700 pb-4">探索旅行者推薦</h3>
+          
+          <!-- 地區分類標籤 - 使用更簡約的按鈕設計 -->
           <div class="flex flex-wrap gap-4 mb-12 pb-4">
             <button 
               v-for="(region, index) in regions" 
@@ -68,14 +72,16 @@
             </div>
           </div>
         </div>
-          <!-- AI建議區 - 更現代的表單設計 -->
+        
+        <!-- AI建議區 - 更現代的表單設計 -->
         <div class="bg-white rounded-xl shadow-sm p-10 mb-16">
-          <h3 class="text-xl lg:text-2xl font-light mb-10 text-emerald-700 pb-4">AI行程建議</h3>
+          <h3 class="text-2xl font-light mb-10 text-emerald-700 pb-4">AI行程建議</h3>
           
-          <form @submit.prevent="handleFormSubmit">            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <form @submit.prevent="handleFormSubmit">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
               <div class="mb-4">
                 <label class="block text-emerald-700 text-sm mb-3 font-medium pb-1">旅遊區域</label>
-                <select v-model="selectedRegion" @change="updateCountries" class="w-full rounded-lg border border-green-200 px-3 lg:px-4 py-2 lg:py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors text-sm lg:text-base appearance-none">
+                <select v-model="selectedRegion" @change="updateCountries" class="w-full rounded-lg border border-green-200 px-4 py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors">
                   <option value="">請選擇區域</option>
                   <option value="asia">亞洲</option>
                   <option value="europe">歐洲</option>
@@ -86,14 +92,14 @@
               </div>
               <div class="mb-4">
                 <label class="block text-emerald-700 text-sm mb-3 font-medium pb-1">目的地國家</label>
-                <select v-model="selectedCountry" class="w-full rounded-lg border border-green-200 px-3 lg:px-4 py-2 lg:py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors text-sm lg:text-base appearance-none">
+                <select v-model="selectedCountry" class="w-full rounded-lg border border-green-200 px-4 py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors">
                   <option value="">{{ countryPlaceholder }}</option>
                   <option v-for="country in availableCountries" :key="country" :value="country">{{ country }}</option>
                 </select>
               </div>
               <div class="mb-4">
                 <label class="block text-emerald-700 text-sm mb-3 font-medium pb-1">旅遊天數</label>
-                <select v-model="travelDays" class="w-full rounded-lg border border-green-200 px-3 lg:px-4 py-2 lg:py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors text-sm lg:text-base appearance-none">
+                <select v-model="travelDays" class="w-full rounded-lg border border-green-200 px-4 py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors">
                   <option value="">請選擇天數</option>
                   <option value="3-5">3-5天</option>
                   <option value="6-8">6-8天</option>
@@ -102,14 +108,15 @@
                 </select>
               </div>
             </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 py-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 py-4">
               <div class="mb-4">
                 <label class="block text-emerald-700 text-sm mb-3 font-medium py-1">出發日期</label>
-                <input type="date" v-model="departureDate" class="w-full rounded-lg border border-green-200 px-3 lg:px-4 py-2 lg:py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors text-sm lg:text-base">
+                <input type="date" v-model="departureDate" class="w-full rounded-lg border border-green-200 px-4 py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors">
               </div>
               <div class="mb-4">
                 <label class="block text-emerald-700 text-sm mb-3 font-medium py-1">旅遊類型</label>
-                <select v-model="travelType" class="w-full rounded-lg border border-green-200 px-3 lg:px-4 py-2 lg:py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors text-sm lg:text-base appearance-none">
+                <select v-model="travelType" class="w-full rounded-lg border border-green-200 px-4 py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors">
                   <option value="">請選擇旅遊類型</option>
                   <option value="family">家庭旅遊</option>
                   <option value="honeymoon">蜜月旅行</option>
@@ -118,13 +125,14 @@
                   <option value="food">美食之旅</option>
                 </select>
               </div>
-            </div><div class="mb-12" ref="specialRequirementsSection">
-              <label class="block text-emerald-700 text-sm mb-3 font-medium py-1">特別需求或偏好</label>              <textarea 
+            </div>            <div class="mb-12" ref="specialRequirementsSection">
+              <label class="block text-emerald-700 text-sm mb-3 font-medium py-1">特別需求或偏好</label>
+              <textarea 
                 ref="specialRequirementsTextarea"
                 v-model="specialRequirements" 
-                class="w-full rounded-lg border border-green-200 px-3 lg:px-4 py-2 lg:py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors h-32 text-sm lg:text-base" 
+                class="w-full rounded-lg border border-green-200 px-4 py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors h-32" 
                 placeholder="請輸入您的特別需求或偏好..."
-              ></textarea><!-- 快速選取按鈕 -->
+              ></textarea>              <!-- 快速選取按鈕 -->
               <div v-show="showQuickOptions" class="mt-4 flex flex-wrap gap-3 transition-all duration-300 ease-in-out">
                 <span class="text-sm text-emerald-600 font-medium">快速選取：</span>
                 <button
@@ -187,8 +195,9 @@
           </div>
           
           <!-- AI回覆區域 - 更優雅的卡片設計 -->          
-          <div v-if="aiResponse" class="mt-16 border border-green-200 rounded-xl bg-white shadow-sm overflow-hidden">            <div class="bg-green-100 p-5 border-b border-green-200 flex justify-between items-center">
-              <h4 class="text-lg lg:text-xl font-medium text-emerald-800">您的專屬行程建議</h4>
+          <div v-if="aiResponse" class="mt-16 border border-green-200 rounded-xl bg-white shadow-sm overflow-hidden">
+            <div class="bg-green-100 p-5 border-b border-green-200 flex justify-between items-center">
+              <h4 class="text-xl font-medium text-emerald-800">您的專屬行程建議</h4>
               <div v-if="selectedCountry" class="text-sm text-emerald-700 bg-white px-3 py-1 rounded-full">
                 {{ selectedCountry }} {{ actualDaysCount > 0 ? actualDaysCount : travelDays }}天行程
               </div>
@@ -457,11 +466,10 @@ export default {
       showDaysWarning: false,
       requestedMinDays: 0,
       requestedMaxDays: 0,
-      requestedDaysRange: '',
-      aiResponse: null,      isLoading: false,
-      isProcessing: false, // 處理保存到Firebase的狀態
+      requestedDaysRange: '',      aiResponse: null,      isLoading: false,      isProcessing: false, // 處理保存到Firebase的狀態
       showQuickOptions: false, // 控制快速選取按鈕的顯示
-      apiBaseUrl: 'http://localhost:3333/api', // API基礎URL，使用與比比看相同的端口
+      apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 
+        (import.meta.env.MODE === 'development' ? 'http://localhost:3333/api' : 'https://final-project-backend-blond.vercel.app/api'), // 動態 API URL
       errorMessage: null,
       savedItineraries: [],
       showSavedItineraries: false,
@@ -2418,38 +2426,5 @@ export default {
 .itinerary-content :deep(em) {
   font-style: italic;
   color: #34d399;
-}
-
-/* 下拉選單響應式樣式 */
-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
-}
-
-/* 手機版優化 */
-@media (max-width: 768px) {
-  select {
-    background-size: 1.2em 1.2em;
-    padding-right: 2rem;
-  }
-  
-  /* 確保選項不會超出螢幕 */
-  select option {
-    font-size: 14px;
-    padding: 8px 12px;
-  }
-  
-  /* 修正手機版表單元素的樣式 */
-  input[type="date"] {
-    min-height: 44px; /* iOS 最小觸控目標 */
-  }
-  
-  textarea {
-    min-height: 120px;
-    resize: vertical;
-  }
 }
 </style>
