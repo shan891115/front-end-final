@@ -16,17 +16,30 @@ let adminApp;
 let database;
 
 try {
-  // 優先順序: 1.服務帳號文件 2.環境變數 3.硬編碼配置
+  // 優先順序: 1.環境變數 2.服務帳號文件 3.硬編碼配置
   let credential = null;
   let dbUrl = process.env.FIREBASE_DATABASE_URL || hardcodedConfig.databaseURL;
   
   console.log('\n===== Firebase Admin 初始化 =====');
   
-  // 方法 1: 嘗試使用服務帳號文件
-  if (fs.existsSync(serviceAccountPath)) {
+  // 方法 1: 嘗試使用環境變數 (適用於 Vercel 部署)
+  if (process.env.FIREBASE_ADMIN_SDK_KEY) {
+    console.log('使用環境變數初始化 Firebase Admin...');
+    try {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK_KEY);
+      credential = admin.credential.cert(serviceAccount);
+      console.log('✅ 環境變數服務帳戶憑證解析成功');
+    } catch (error) {
+      console.error('❌ 環境變數服務帳戶憑證解析失敗:', error.message);
+    }
+  }
+  
+  // 方法 2: 嘗試使用服務帳號文件 (適用於本地開發)
+  if (!credential && fs.existsSync(serviceAccountPath)) {
     console.log('使用服務帳號文件初始化...');
     const serviceAccount = require(serviceAccountPath);
     credential = admin.credential.cert(serviceAccount);
+    console.log('✅ 服務帳戶文件讀取成功');
   }
   // 方法 2: 嘗試使用環境變數中的服務帳號
   else if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_PROJECT_ID) {
