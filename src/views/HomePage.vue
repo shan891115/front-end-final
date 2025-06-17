@@ -166,7 +166,7 @@
     </section>
       <!-- 詳情彈出視窗 -->
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeModal">
-      <div class="bg-white rounded-lg max-w-3xl w-full mx-4 max-h-[95vh] overflow-y-auto" @click.stop>
+      <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[95vh] overflow-y-auto" @click.stop>
         <div class="p-6">
           <!-- 關閉按鈕 -->
           <div class="flex justify-between items-center mb-4 pb-2">
@@ -186,24 +186,24 @@
           <div class="space-y-4">
             <div>
               <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">景點特色</h3>
-              <p class="text-gray-700">{{ selectedDestination.features }}</p>
+              <p class="text-gray-700 text-sm">{{ selectedDestination.features }}</p>
             </div>
             
             <div>
               <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">推薦活動</h3>
-              <ul class="list-disc list-inside text-gray-700 space-y-1">
+              <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
                 <li v-for="activity in selectedDestination.activities" :key="activity">{{ activity }}</li>
               </ul>
             </div>
             
             <div>
               <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">最佳旅遊時間</h3>
-              <p class="text-gray-700">{{ selectedDestination.bestTime }}</p>
+              <p class="text-gray-700 text-sm">{{ selectedDestination.bestTime }}</p>
             </div>
             
             <div>
               <h3 class="text-lg font-semibold mb-2 text-green-600 pt-4">預估費用</h3>
-              <p class="text-gray-700">{{ selectedDestination.cost }}</p>
+              <p class="text-gray-700 text-sm">{{ selectedDestination.cost }}</p>
             </div>
           </div>
             <!-- 動作按鈕 -->
