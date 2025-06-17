@@ -10,7 +10,29 @@ cleanupService.setupCleanupTask();
 
 const app = express();
 
+// 調試：輸出 CORS 配置
+console.log('CORS 配置:', config.cors);
+
 // 中間件
+// 更強力的 CORS 配置
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log('請求來源:', origin);
+  
+  res.header('Access-Control-Allow-Origin', 'https://front-end-final-tawny.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // 處理預檢請求
+  if (req.method === 'OPTIONS') {
+    console.log('處理預檢請求:', req.url);
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
 app.use(cors({
   origin: config.cors.origin,
   credentials: config.cors.credentials,

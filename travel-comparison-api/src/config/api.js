@@ -9,15 +9,10 @@ module.exports = {
     model: process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp'
   },
   cors: {
-    origin: [
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'https://front-end-final-tawny.vercel.app',
-      'https://final-project-backend-blond.vercel.app'
-    ],
+    origin: '*', // 暫時允許所有來源，以測試是否是 CORS 問題
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
   },
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
