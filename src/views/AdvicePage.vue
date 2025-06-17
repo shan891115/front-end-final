@@ -1979,9 +1979,8 @@ export default {
       if (itinerary.specialRequirements) {
         this.specialRequirements = itinerary.specialRequirements;
       }
-      
-      // 如果沒有表單欄位資訊，嘗試從內容中提取
-      const missingFields = [];
+        // 如果沒有表單欄位資訊，嘗試從內容中提取
+      let missingFields = [];
       let needsExtracting = false;
       
       if (!this.selectedCountry) {
