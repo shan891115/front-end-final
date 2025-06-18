@@ -22,7 +22,7 @@ import NavBar from './components/NavBar.vue';
           </div>
           
           <div class="w-full md:w-auto text-center">
-            <p class="text-green-100">© 2025 YU-SHAN 的網站. 版權所有.</p>
+            <p class="text-green-100">© 2025 <a href="https://self-introduction-alpha.vercel.app/" target="_blank" class="text-green-200 hover:text-white underline">YU-SHAN 的網站</a>. 版權所有.</p>
           </div>
         </div>
       </div>
