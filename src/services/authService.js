@@ -30,9 +30,9 @@ console.log('STORAGE_BUCKET 存在:', !!import.meta.env.VITE_FIREBASE_STORAGE_BU
 console.log('MESSAGING_SENDER_ID 存在:', !!import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID);
 console.log('APP_ID 存在:', !!import.meta.env.VITE_FIREBASE_APP_ID);
 
-// 詳細調試信息
-console.log('所有環境變數:', import.meta.env);
-console.log('Firebase 配置對象:', firebaseConfig);
+// 移除敏感資訊的輸出
+console.log('環境變數總數:', Object.keys(import.meta.env).length);
+console.log('Firebase 配置完整性:', Object.values(firebaseConfig).every(v => !!v));
 
 // 檢查是否有空值
 Object.entries(firebaseConfig).forEach(([key, value]) => {
@@ -96,8 +96,23 @@ if (auth) {
       isAuthenticated.value = false;
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_INFO_KEY);
+    }  });
+} else {
+  console.warn('Firebase Auth 未初始化，嘗試從 localStorage 恢復用戶狀態');
+  // 如果 Firebase Auth 未初始化，嘗試從 localStorage 恢復用戶狀態
+  try {
+    const savedUser = localStorage.getItem(USER_INFO_KEY);
+    const savedToken = localStorage.getItem(TOKEN_KEY);
+    
+    if (savedUser && savedToken) {
+      const userData = JSON.parse(savedUser);
+      currentUser.value = userData;
+      isAuthenticated.value = true;
+      console.log('從 localStorage 恢復用戶狀態:', userData.email);
     }
-  });
+  } catch (error) {
+    console.warn('從 localStorage 恢復用戶狀態失敗:', error);
+  }
 }
 
 // 註冊新用戶

@@ -254,48 +254,45 @@
                   class="px-6 py-3 bg-white border border-green-300 text-emerald-700 rounded-full hover:bg-green-50 transition-colors text-sm font-medium"
                 >
                   修改建議
-                </button>                
-                <button 
+                </button>                  <button 
                   @click="saveItinerary" 
                   class="px-6 py-3 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-colors text-sm font-medium flex items-center"
+                  title="儲存到瀏覽器本地，用於一般查看和管理"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
                   </svg>
-                  儲存行程到瀏覽器
-                </button>                
-                <button 
+                  儲存到本地瀏覽器
+                </button>                <button 
                   @click="confirmAndSaveToFirebase"
                   :disabled="isProcessing" 
                   class="px-6 py-3 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition-colors text-sm font-medium flex items-center"
-                  :title="extractInfoFromItinerary(aiResponse).country ? 
-                          `將自動提取資訊：${extractInfoFromItinerary(aiResponse).country} ${extractInfoFromItinerary(aiResponse).days || ''}天行程` : 
-                          '儲存至雲端並支援照片牆關聯'"
+                  title="儲存至雲端資料庫，專供照片牆頁面使用以關聯照片"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                   </svg>
-                  {{ isProcessing ? '儲存中...' : '確認採用並儲存至雲端' }}
+                  {{ isProcessing ? '儲存中...' : '儲存至雲端 (供照片牆使用)' }}
                 </button>
               </div>
             </div>
           </div>
-          
-          <!-- 查看已儲存行程按鈕 -->
+            <!-- 查看已儲存行程按鈕 -->
           <div class="mt-12 py-4 pt-6" :class="{ 'pt-4': showLoginPrompt }">
             <button 
               @click="loadSavedItineraries" 
               class="px-6 py-3 bg-white border border-green-300 text-emerald-700 rounded-full hover:bg-green-50 transition-colors text-sm font-medium"
+              title="查看儲存在瀏覽器本地的行程"
             >
-              查看已儲存的行程
+              查看本地儲存的行程
             </button>
           </div>
           
           <!-- 已儲存行程列表 - 更現代的卡片列表 -->
           <div v-if="showSavedItineraries" class="mt-16">
-            <h4 class="text-xl font-medium mb-8 text-emerald-800">已儲存的行程</h4>
+            <h4 class="text-xl font-medium mb-8 text-emerald-800 py-2">本地儲存的行程</h4>
             <div v-if="savedItineraries.length === 0" class="p-6 bg-green-50 rounded-lg text-center text-emerald-600">
-              尚未保存任何行程
+              尚未在本地保存任何行程
             </div>
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div 
@@ -350,7 +347,7 @@
 <script>
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import { isAuthenticated } from '../services/authService';
+import { isAuthenticated, currentUser } from '../services/authService';
 import aiService from '../services/aiService';
 
 export default {
@@ -476,8 +473,11 @@ export default {
       showLoginPrompt: false,
       router: useRouter()
     }
-  },  
-  computed: {
+  },    computed: {
+    currentUser() {
+      return currentUser.value;
+    },
+    
     filteredRecommendations() {
       return this.recommendations.filter(rec => rec.region === this.currentRegion);
     },
@@ -686,16 +686,24 @@ export default {
   methods: {
     changeRegion(region) {
       this.currentRegion = region;
-    },
-    updateCountries() {
+    },    
+    updateCountries(preserveSelectedCountry = false) {
       if (this.selectedRegion) {
         this.availableCountries = this.regionCountries[this.selectedRegion];
         this.countryPlaceholder = '請選擇國家';
+        
+        // 如果不需要保留選中的國家，或者選中的國家不在新的列表中，則清空
+        if (!preserveSelectedCountry || 
+            !this.availableCountries.includes(this.selectedCountry)) {
+          this.selectedCountry = '';
+        }
       } else {
         this.availableCountries = [];
         this.countryPlaceholder = '請先選擇區域';
+        if (!preserveSelectedCountry) {
+          this.selectedCountry = '';
+        }
       }
-      this.selectedCountry = '';
     },
     addQuickOption(option) {
       const quickPrompts = {
@@ -1471,7 +1479,7 @@ export default {
       // 更新組件中的資料
       this.savedItineraries = savedItineraries;
       
-      alert('行程已儲存到您的瀏覽器中！您可以點擊"查看儲存的行程"按鈕來查看。\n\n注意：如果要在照片牆中關聯行程，請使用"確認採用此行程"按鈕將行程儲存至雲端。');
+      alert('行程已儲存到您的瀏覽器本地！您可以點擊"查看本地儲存的行程"按鈕來查看。\n\n💡 提示：如果要在照片牆中關聯行程，請使用"儲存至雲端 (供照片牆使用)"按鈕將行程儲存至雲端資料庫。');
     },    async confirmAndSaveToFirebase() {
       if (!this.aiResponse) {
         alert('沒有行程內容可以儲存');
@@ -1485,12 +1493,30 @@ export default {
         }, 5000);
         return;
       }
-      
       try {
         this.isProcessing = true;
         
         // 從行程內容中提取資訊 (類似爬蟲)
         const extractedInfo = this.extractInfoFromItinerary(this.aiResponse);
+        
+        // 自動更新表單字段，確保UI與提取的信息同步        // 首先設置區域，這會觸發國家列表更新
+        if (!this.selectedRegion && extractedInfo.region) {
+          this.selectedRegion = extractedInfo.region;
+          this.updateCountries(true); // 保留選中的國家
+        }
+        
+        // 然後設置國家（在區域設置後，國家列表已更新）
+        if (!this.selectedCountry && extractedInfo.country) {
+          this.selectedCountry = extractedInfo.country;
+        }
+        
+        if (!this.travelDays && extractedInfo.days) {
+          this.travelDays = extractedInfo.days;
+        }
+        
+        if (!this.travelType && extractedInfo.type) {
+          this.travelType = extractedInfo.type;
+        }
         
         // 如果無法從內容中提取到國家和天數，則使用表單中的值
         let country = this.selectedCountry || extractedInfo.country;
@@ -1621,12 +1647,18 @@ export default {
           region: itineraryData.region,
           dailyHighlights: itineraryData.dailyHighlights
         });
-        
-        // 僅儲存到 Firebase，不再重複儲存到 localStorage
-        const result = await aiService.saveItineraryToFirebase(itineraryData);
-        
-        if (result.success) {
-          alert(`行程已成功採用並儲存至雲端！\n行程ID: ${result.id}\n您現在可以在照片牆中上傳並關聯此行程的照片。`);
+          // 添加用戶 ID 到行程資料中
+        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        const userItineraryData = {
+          ...itineraryData,
+          userId: userInfo.uid || currentUser.value?.uid, // 確保有用戶 ID
+          userEmail: userInfo.email || currentUser.value?.email // 額外保存用戶郵箱以便識別
+        };
+
+        // 儲存到 Firebase，按用戶分離
+        const result = await aiService.saveItineraryToFirebase(userItineraryData);
+          if (result.success) {
+          alert(`行程已成功儲存至雲端資料庫！\n行程ID: ${result.id}\n\n此行程已專門儲存供照片牆頁面使用。\n您可以前往照片牆頁面上傳照片並關聯此行程。`);
         } else {
           alert('儲存失敗：' + (result.error || '未知錯誤'));
         }
@@ -1675,18 +1707,71 @@ export default {
         } else if (dayMatch && dayMatch[1]) {
           // 從第一天描述中提取可能的國家或城市
           const location = dayMatch[1].trim();
-          
-          // 城市到國家的映射
+            // 城市到國家的映射（擴展版）
           const cityToCountry = {
-            '東京': '日本', '大阪': '日本', '京都': '日本',
-            '首爾': '韓國', '釜山': '韓國',
-            '曼谷': '泰國', '普吉島': '泰國', '清邁': '泰國',
-            '台北': '台灣', '高雄': '台灣',
-            '紐約': '美國', '洛杉磯': '美國', '舊金山': '美國',
-            '巴黎': '法國', '倫敦': '英國', '羅馬': '義大利',
-            '雪梨': '澳洲', '墨爾本': '澳洲',
-            '馬德里': '西班牙', '巴塞羅那': '西班牙',
-            '溫哥華': '加拿大', '多倫多': '加拿大'
+            // 亞洲
+            '東京': '日本', '大阪': '日本', '京都': '日本', '橫濱': '日本', '神戶': '日本', '福岡': '日本', '名古屋': '日本',
+            '首爾': '韓國', '釜山': '韓國', '濟州島': '韓國', '大邱': '韓國',
+            '曼谷': '泰國', '普吉島': '泰國', '清邁': '泰國', '芭堤雅': '泰國',
+            '台北': '台灣', '高雄': '台灣', '台中': '台灣', '台南': '台灣',
+            '吉隆坡': '馬來西亞', '檳城': '馬來西亞',
+            '新加坡': '新加坡',
+            '河內': '越南', '胡志明市': '越南', '峴港': '越南',
+            '雅加達': '印尼', '峇里島': '印尼',
+            '馬尼拉': '菲律賓', '宿霧': '菲律賓',
+            '北京': '中國', '上海': '中國', '廣州': '中國', '深圳': '中國', '杭州': '中國', '成都': '中國',
+            '香港': '香港',
+            '澳門': '澳門',
+            '孟買': '印度', '新德里': '印度', '加爾各答': '印度',
+            '迪拜': '阿聯酋', '阿布達比': '阿聯酋',
+            '伊斯坦布爾': '土耳其', '安卡拉': '土耳其',
+            
+            // 歐洲
+            '倫敦': '英國', '愛丁堡': '英國', '曼徹斯特': '英國',
+            '巴黎': '法國', '里昂': '法國', '馬賽': '法國', '尼斯': '法國',
+            '柏林': '德國', '慕尼黑': '德國', '漢堡': '德國', '科隆': '德國',
+            '羅馬': '義大利', '米蘭': '義大利', '威尼斯': '義大利', '佛羅倫斯': '義大利', '那不勒斯': '義大利',
+            '馬德里': '西班牙', '巴塞羅那': '西班牙', '塞維亞': '西班牙',
+            '里斯本': '葡萄牙', '波爾圖': '葡萄牙',
+            '蘇黎世': '瑞士', '日內瓦': '瑞士', '伯爾尼': '瑞士',
+            '維也納': '奧地利', '薩爾茨堡': '奧地利',
+            '阿姆斯特丹': '荷蘭', '海牙': '荷蘭',
+            '布魯塞爾': '比利時',
+            '雅典': '希臘', '聖托里尼': '希臘',
+            '布拉格': '捷克',
+            '布達佩斯': '匈牙利',
+            '華沙': '波蘭', '克拉科夫': '波蘭',
+            '哥本哈根': '丹麥',
+            '斯德哥爾摩': '瑞典',
+            '奧斯陸': '挪威',
+            '赫爾辛基': '芬蘭',
+            '雷克雅維克': '冰島',
+            '都柏林': '愛爾蘭',
+            '札格拉布': '克羅埃西亞',
+            
+            // 美洲
+            '紐約': '美國', '洛杉磯': '美國', '舊金山': '美國', '芝加哥': '美國', '拉斯維加斯': '美國', 
+            '邁阿密': '美國', '西雅圖': '美國', '波士頓': '美國', '華盛頓': '美國',
+            '溫哥華': '加拿大', '多倫多': '加拿大', '蒙特婁': '加拿大', '卡爾加里': '加拿大',
+            '墨西哥城': '墨西哥', '坎昆': '墨西哥',
+            '聖保羅': '巴西', '里約熱內盧': '巴西',
+            '布宜諾斯艾利斯': '阿根廷',
+            '聖地亞哥': '智利',
+            '利馬': '秘魯',
+            '波哥大': '哥倫比亞',
+            '哈瓦那': '古巴',
+            
+            // 大洋洲
+            '雪梨': '澳洲', '墨爾本': '澳洲', '布里斯班': '澳洲', '伯斯': '澳洲', '阿得雷德': '澳洲',
+            '奧克蘭': '紐西蘭', '威靈頓': '紐西蘭', '基督城': '紐西蘭',
+            '蘇瓦': '斐濟',
+            
+            // 非洲
+            '開羅': '埃及', '亞歷山大': '埃及',
+            '卡薩布蘭卡': '摩洛哥', '馬拉喀什': '摩洛哥', '拉巴特': '摩洛哥',
+            '開普敦': '南非', '約翰尼斯堡': '南非',
+            '奈洛比': '肯亞',
+            '達累斯薩拉姆': '坦尚尼亞'
           };
           
           if (cityToCountry[location]) {
@@ -1696,36 +1781,70 @@ export default {
             result.country = location;
           }
         }
-        
-        // 如果仍然沒有找到國家，嘗試在整個文本中搜索常見國家名稱
+          // 如果仍然沒有找到國家，嘗試在整個文本中更智能地搜索國家名稱
         if (!result.country) {
           const commonCountries = [
             '日本', '韓國', '泰國', '台灣', '新加坡', '馬來西亞', '越南', 
             '印尼', '菲律賓', '中國', '香港', '澳門', '印度', '美國', '加拿大', 
             '墨西哥', '英國', '法國', '德國', '義大利', '西班牙', '葡萄牙', 
             '瑞士', '荷蘭', '比利時', '奧地利', '希臘', '澳洲', '紐西蘭',
-            '埃及', '摩洛哥', '南非'
+            '埃及', '摩洛哥', '南非', '阿聯酋', '土耳其', '巴西', '阿根廷', '智利',
+            '秘魯', '哥倫比亞', '古巴', '斐濟', '肯亞', '坦尚尼亞', '捷克', '匈牙利',
+            '波蘭', '丹麥', '瑞典', '挪威', '芬蘭', '冰島', '愛爾蘭', '克羅埃西亞'
           ];
           
-          // 首先尋找 "XXX行程" 或 "XXX旅遊" 模式
+          // 第一優先級：尋找 "XXX行程" 或 "XXX旅遊" 等明確的模式
           for (const country of commonCountries) {
-            if (content.includes(`${country}行程`) || 
-                content.includes(`${country}旅遊`) || 
-                content.includes(`${country}之旅`) ||
-                content.match(new RegExp(`${country}\\s*\\d+\\s*天`))) {
-              result.country = country;
-              break;
+            const patterns = [
+              `${country}行程`,
+              `${country}旅遊`,
+              `${country}之旅`,
+              `${country}遊記`,
+              `${country}攻略`,
+              `${country}深度遊`,
+              `前往${country}`,
+              `到${country}`,
+              `${country}\\s*\\d+\\s*天`,
+              `${country}\\s*\\d+\\s*日`
+            ];
+            
+            for (const pattern of patterns) {
+              if (content.match(new RegExp(pattern))) {
+                result.country = country;
+                break;
+              }
+            }
+            
+            if (result.country) break;
+          }
+          
+          // 第二優先級：尋找在標題或重要位置出現的國家名稱
+          if (!result.country) {
+            for (const country of commonCountries) {
+              // 檢查是否在標題行（以#開頭）中出現
+              const titleMatch = content.match(new RegExp(`^#[^\\n]*${country}[^\\n]*$`, 'm'));
+              if (titleMatch) {
+                result.country = country;
+                break;
+              }
+              
+              // 檢查是否在文檔開頭附近出現
+              const firstParagraph = content.substring(0, 200);
+              if (firstParagraph.includes(country)) {
+                result.country = country;
+                break;
+              }
             }
           }
           
-          // 如果仍找不到，則尋找最常出現的國家名稱
+          // 第三優先級：尋找出現頻率最高的國家名稱
           if (!result.country) {
             let maxCount = 0;
             let mostMentioned = null;
             
             for (const country of commonCountries) {
-              // 建立一個正則表達式來匹配整個單詞的國家名稱
-              const regex = new RegExp(`[^\\w]${country}[^\\w]|^${country}[^\\w]|[^\\w]${country}$|^${country}$`, 'g');
+              // 使用更精確的正則表達式來避免誤匹配
+              const regex = new RegExp(`(?:^|[^\\p{L}])${country}(?=[^\\p{L}]|$)`, 'gu');
               const matches = content.match(regex);
               const count = matches ? matches.length : 0;
               
@@ -1735,8 +1854,8 @@ export default {
               }
             }
             
-            // 只有當國家名稱出現次數足夠多時才採用
-            if (maxCount >= 2) {
+            // 只有當國家名稱出現次數足夠多時才採用（降低門檻）
+            if (maxCount >= 1) {
               result.country = mostMentioned;
             }
           }
@@ -1842,8 +1961,8 @@ export default {
             break;
           }
         }
-        
         console.log('從行程中提取的資訊:', result);
+        console.log('提取詳情 - 標題匹配:', titleMatch, '目的地匹配:', destinationMatch, '第一天匹配:', dayMatch);
         return result;
       } catch (error) {
         console.warn('從行程提取資訊時發生錯誤:', error);
@@ -1939,13 +2058,15 @@ export default {
       }
       
       return []; // 如果無法提取任何每日行程資訊
-    },
-    
-    loadSavedItineraries() {
-      // 從本地儲存加載已保存的行程
+    },    loadSavedItineraries() {
+      // 從本地儲存加載已保存的行程 (用於一般查看和管理)
       this.savedItineraries = JSON.parse(localStorage.getItem('savedItineraries') || '[]');
       this.showSavedItineraries = true;
-    },    loadItinerary(itinerary) {
+      
+      if (this.savedItineraries.length === 0) {
+        alert('您尚未在本地儲存任何行程');
+      }
+    },loadItinerary(itinerary) {
       // 將選定的行程載入到當前視圖
       this.aiResponse = itinerary.content;
       
@@ -1960,10 +2081,9 @@ export default {
       if (itinerary.days) {
         this.travelDays = itinerary.days;
       }
-      
       if (itinerary.region) {
         this.selectedRegion = itinerary.region;
-        this.updateCountries(); // 更新國家列表
+        this.updateCountries(true); // 保留現有的國家選擇
       }
       
       if (itinerary.type) {
@@ -1997,10 +2117,16 @@ export default {
         missingFields.push('區域');
         needsExtracting = true;
       }
-      
       if (needsExtracting) {
         const extractedInfo = this.extractInfoFromItinerary(itinerary.content);
+          // 首先設置區域，這會觸發國家列表更新
+        if (!this.selectedRegion && extractedInfo.region) {
+          this.selectedRegion = extractedInfo.region;
+          this.updateCountries(true); // 保留選中的國家
+          missingFields = missingFields.filter(field => field !== '區域');
+        }
         
+        // 然後設置國家（在區域設置後，國家列表已更新）
         if (!this.selectedCountry && extractedInfo.country) {
           this.selectedCountry = extractedInfo.country;
           missingFields = missingFields.filter(field => field !== '國家');
@@ -2011,39 +2137,44 @@ export default {
           missingFields = missingFields.filter(field => field !== '旅遊天數');
         }
         
-        if (!this.selectedRegion && extractedInfo.region) {
-          this.selectedRegion = extractedInfo.region;
-          this.updateCountries(); // 更新國家列表
-          missingFields = missingFields.filter(field => field !== '區域');
-        }
-        
         if (!this.travelType && extractedInfo.type) {
           this.travelType = extractedInfo.type;
         }
       }
-      
-      // 顯示提示訊息
+        // 顯示提示訊息
       setTimeout(() => {
         let message = '行程已載入！\n\n';
         
         if (missingFields.length > 0) {
           message += `系統已嘗試自動填充必要資訊，但仍缺少以下欄位: ${missingFields.join('、')}\n`;
           message += '請在表單中手動選擇這些資訊，以確保能夠成功儲存到雲端。\n\n';
+        } else {
+          message += '系統已成功自動填充所有必要資訊！\n\n';
         }
         
-        message += '如果您希望將此行程儲存至雲端以便在照片牆中關聯，請點擊"確認採用並儲存至雲端"按鈕。';
+        message += '如果您希望將此行程儲存至雲端以便在照片牆中關聯，請點擊"儲存至雲端 (供照片牆使用)"按鈕。';
+        
+        // 添加調試信息（開發階段）
+        if (needsExtracting) {
+          message += `\n\n[調試] 自動提取結果:\n區域: ${this.selectedRegion}\n國家: ${this.selectedCountry}\n天數: ${this.travelDays}`;
+        }
+        
         alert(message);
       }, 500);
       
       this.showSavedItineraries = false;
-    },
-    
-    deleteItinerary(id) {
-      // 刪除指定行程
+    },    deleteItinerary(id) {
+      if (!confirm('確定要刪除這個行程嗎？此操作無法復原。')) {
+        return;
+      }
+
+      // 從本地儲存刪除指定行程
       let savedItineraries = JSON.parse(localStorage.getItem('savedItineraries') || '[]');
       savedItineraries = savedItineraries.filter(item => item.id !== id);
       localStorage.setItem('savedItineraries', JSON.stringify(savedItineraries));
       this.savedItineraries = savedItineraries;
+      
+      alert('行程已從本地儲存中刪除');
     },
 
     // 處理表單提交

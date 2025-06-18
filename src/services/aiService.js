@@ -4,8 +4,7 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
   (import.meta.env.MODE === 'development' ? 'http://localhost:3333/api' : 'https://final-project-backend-blond.vercel.app/api');
 
-const aiService = {
-  async saveItineraryToFirebase(itineraryData) {
+const aiService = {  async saveItineraryToFirebase(itineraryData) {
     try {
       const response = await axios.post(`${API_BASE_URL}/ai/save-itinerary`, itineraryData);
       return response.data;
@@ -15,22 +14,37 @@ const aiService = {
     }
   },
 
-  async getItineraries() {
+  async getItineraries(userId) {
     try {
-      const response = await axios.get(`${API_BASE_URL}/ai/itineraries`);
+      const response = await axios.get(`${API_BASE_URL}/ai/itineraries`, {
+        params: { userId } // 傳遞用戶 ID 參數
+      });
       return response.data;
     } catch (error) {
       console.error('獲取行程列表失敗:', error);
       return { success: false, error: error.message };
     }
   },
-
-  async getItineraryById(id) {
+  async getItineraryById(id, userId) {
     try {
-      const response = await axios.get(`${API_BASE_URL}/ai/itineraries/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/ai/itineraries/${id}`, {
+        params: { userId } // 傳遞用戶 ID 參數
+      });
       return response.data;
     } catch (error) {
       console.error(`獲取行程 ID:${id} 失敗:`, error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async deleteItinerary(id, userId) {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/ai/itineraries/${id}`, {
+        params: { userId } // 傳遞用戶 ID 參數
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`刪除行程 ID:${id} 失敗:`, error);
       return { success: false, error: error.message };
     }
   },

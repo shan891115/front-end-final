@@ -2,9 +2,8 @@
   <div class="min-h-screen flex flex-col">
     <!-- 頁頭區域 -->
     <section class="flex justify-center bg-gradient-to-r from-green-500 to-teal-600 text-white py-16">
-      <div class="container mx-auto px-4 text-center">
-        <h2 class="text-4xl font-bold mb-4 pb-2">旅遊照片牆</h2>
-        <p class="text-xl mb-4">透過美麗的照片探索世界各地的風景</p>
+      <div class="container mx-auto px-4 text-center">        <h2 class="text-4xl font-bold mb-4 pb-2">個人旅遊照片牆</h2>
+        <p class="text-xl mb-4">記錄並分享您的專屬旅行回憶</p>
       </div>
     </section>
 
@@ -27,10 +26,9 @@
         </div>
         
         <!-- 照片管理工具列 -->
-        <div class="flex justify-between items-center mb-6 bg-white rounded-lg p-4 shadow-sm">
-          <div class="text-sm text-gray-600">
-            <span v-if="photos.length > 0">目前顯示 {{ photos.length }} 張照片</span>
-            <span v-else>尚無照片</span>
+        <div class="flex justify-between items-center mb-6 bg-white rounded-lg p-4 shadow-sm">          <div class="text-sm text-gray-600">
+            <span v-if="photos.length > 0">您的照片牆目前有 {{ photos.length }} 張照片</span>
+            <span v-else>您的照片牆目前是空的</span>
           </div>
           <div class="flex gap-2">
             <button 
@@ -39,13 +37,19 @@
               title="管理照片"
             >
               ⚙️ 管理
-            </button>
-            <button 
+            </button>            <button 
               @click="refreshPhotos" 
               class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
               title="重新整理照片"
             >
               🔄 重新整理
+            </button>
+            <button 
+              @click="forceReloadPhotos" 
+              class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm"
+              title="強制重新載入（清除快取）"
+            >
+              🔥 強制載入
             </button>
           </div>
         </div>
@@ -57,17 +61,18 @@
         </div>
         
         <!-- 空狀態提示 -->
-        <div v-else-if="photos.length === 0" class="text-center py-20 bg-gray-50 rounded-xl">
+        <div v-else-if="photos.length === 0" class="text-center py-20 bg-gray-50 rounded-xl flex justify-center items-center flex-col">
           <div class="w-20 h-20 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-gray-700 mb-2">沒有找到照片</h3>
-          <p class="text-gray-500 mb-6">目前尚未上傳任何{{ selectedCategoryName }}照片</p>
+          </div>            
+          <h3 class="text-xl font-semibold text-gray-700 mb-2 pt-2">沒有找到照片</h3>
+          <p v-if="selectedCategoryName === '所有照片'" class="text-gray-500 mb-6 pb-2">您的個人照片牆目前尚未上傳任何照片</p>
+          <p v-else class="text-gray-500 mb-6 pb-2">您的個人照片牆目前尚未上傳任何{{ selectedCategoryName }}照片</p>
           <button 
             @click="handleUploadClick"
-            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            class="px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-700 transition-colors"
           >
             上傳新照片
           </button>
@@ -561,7 +566,7 @@
 <script>
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { isAuthenticated } from '../services/authService';
+import { isAuthenticated, getCurrentUser } from '../services/authService';
 import aiService from '../services/aiService';
 import photoService from '../services/photoService';
 import { extractAttractionsFromItinerary } from '../attraction-extractor-final.js';
@@ -602,22 +607,27 @@ export default {  setup() {
     
     // 照片管理相關狀態
     const showPhotoManagement = ref(false);
-    
-    // 計算各種照片數量
+      // 計算各種照片數量 - 只計算當前用戶的照片
     const testPhotoCount = computed(() => {
+      const user = getCurrentUser();
+      const currentUserId = user?.uid || 'anonymous';
       return photos.value.filter(photo => 
-        photo.id.startsWith('singapore_') || photo.id.startsWith('sample_')
+        photo.userId === currentUserId && (photo.id.startsWith('singapore_') || photo.id.startsWith('sample_'))
       ).length;
     });
     
     const userPhotoCount = computed(() => {
+      const user = getCurrentUser();
+      const currentUserId = user?.uid || 'anonymous';
       return photos.value.filter(photo => 
-        !photo.id.startsWith('singapore_') && !photo.id.startsWith('sample_')
+        photo.userId === currentUserId && !photo.id.startsWith('singapore_') && !photo.id.startsWith('sample_')
       ).length;
     });
     
     const localPhotoCount = computed(() => {
-      return photos.value.filter(photo => photo.isLocal).length;
+      const user = getCurrentUser();
+      const currentUserId = user?.uid || 'anonymous';
+      return photos.value.filter(photo => photo.userId === currentUserId && photo.isLocal).length;
     });
     
     // 計算當前選擇的分類名稱
@@ -626,8 +636,20 @@ export default {  setup() {
       return category ? category.name : '';
     });    // 在組件掛載時獲取行程列表和照片列表
     onMounted(async () => {
-      // 先載入照片看看是否有用戶資料
-      await loadPhotos();
+      // 等待身份驗證狀態就緒
+      console.log('=== 組件掛載開始 ===');
+      console.log('初始身份驗證狀態:', isAuthenticated.value);
+      console.log('初始用戶:', getCurrentUser());
+      
+      // 如果用戶已登入，優先載入用戶資料
+      if (isAuthenticated.value) {
+        console.log('用戶已登入，載入用戶照片和行程');
+        await loadItineraries();
+        await loadPhotos();
+      } else {
+        console.log('用戶未登入，載入照片（可能包含測試照片）');
+        await loadPhotos();
+      }
       
       // 檢查是否為開發或測試環境
       const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
@@ -667,13 +689,14 @@ export default {  setup() {
       } else if (photos.value.length > 0) {
         console.log('已找到現有照片，跳過測試照片載入');
       }
-      
-      if (isAuthenticated.value) {
-        await loadItineraries();
-      }
-    });
-      // 加載照片列表
+    });// 加載照片列表
     const loadPhotos = async () => {
+      // 防止重複調用
+      if (isLoadingPhotos.value) {
+        console.log('照片正在載入中，跳過重複調用');
+        return;
+      }
+      
       try {
         console.log('=== 載入照片 ===');
         console.log('目標分類 ID:', selectedCategoryId.value);
@@ -711,19 +734,30 @@ export default {  setup() {
     const loadMorePhotos = () => {
       currentPage.value++;
       loadPhotos();
-    };
-      // 選擇照片分類
+    };    // 選擇照片分類
     const selectCategory = (categoryId) => {
       console.log('=== 分類選擇 ===');
       console.log('選擇的分類 ID:', categoryId);
       console.log('之前的分類 ID:', selectedCategoryId.value);
+      
+      // 如果選擇的是同一個分類，不重複載入
+      if (selectedCategoryId.value === categoryId) {
+        console.log('選擇的分類與目前相同，跳過重複載入');
+        return;
+      }
+      
+      // 如果正在載入中，不允許切換分類
+      if (isLoadingPhotos.value) {
+        console.log('正在載入照片中，跳過分類切換');
+        return;
+      }
       
       selectedCategoryId.value = categoryId;
       currentPage.value = 1;
       
       console.log('開始載入照片...');
       loadPhotos();
-    };      // 獲取分類名稱
+    };// 獲取分類名稱
     const getCategoryName = (categoryId) => {
       const category = photoCategories.value.find(c => c.id === categoryId);
       return category ? category.name : '其他';
@@ -779,13 +813,54 @@ export default {  setup() {
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
-    
-    // 重新整理照片
+      // 重新整理照片
     const refreshPhotos = async () => {
+      console.log('=== 強制重新整理照片 ===');
       currentPage.value = 1;
-      await loadPhotos();
+      
+      // 使用強制重新整理參數
+      try {
+        isLoadingPhotos.value = true;
+        const result = await photoService.getPhotos(selectedCategoryId.value, currentPage.value, 12, true);
+        
+        if (result.success) {
+          photos.value = result.photos;
+          hasMore.value = result.hasMore;
+          console.log('強制重新整理完成，照片數量:', photos.value.length);
+        }
+      } catch (error) {
+        console.error('強制重新整理失敗:', error);
+      } finally {
+        isLoadingPhotos.value = false;
+      }
     };
     
+    // 強制重新載入照片（清除快取）
+    const forceReloadPhotos = async () => {
+      console.log('=== 強制重新載入照片 ===');
+      
+      try {
+        isLoadingPhotos.value = true;
+        const result = await photoService.forceReloadPhotos();
+        
+        if (result.success) {
+          photos.value = result.photos;
+          hasMore.value = result.hasMore;
+          console.log('強制重新載入完成，照片數量:', photos.value.length);
+          
+          // 顯示成功訊息
+          setTimeout(() => {
+            alert(`成功重新載入 ${photos.value.length} 張照片！\n\n已清除本地快取並從雲端重新載入最新資料。`);
+          }, 500);
+        }
+      } catch (error) {
+        console.error('強制重新載入失敗:', error);
+        alert('重新載入失敗，請稍後再試。');
+      } finally {
+        isLoadingPhotos.value = false;
+      }
+    };
+
     // 清除測試照片
     const clearTestPhotos = async () => {
       const confirmMessage = `確定要清除 ${testPhotoCount.value} 張測試照片嗎？\n\n這會移除系統自動添加的範例照片，只保留你上傳的照片。`;
@@ -809,18 +884,17 @@ export default {  setup() {
         alert('❌ 清除測試照片時發生錯誤：' + error.message);
       }
     };
-    
-    // 重新載入範例照片
+      // 重新載入範例照片 - 只針對當前用戶
     const reloadSamplePhotos = async () => {
       if (!confirm('確定要重新載入範例照片嗎？')) {
         return;
       }
       
       try {
-        // 清除現有的測試照片
+        // 清除當前用戶的測試照片
         await photoService.clearTestPhotos();
         
-        // 重新添加範例照片
+        // 重新添加範例照片（會自動綁定到當前用戶）
         photoService.addSingaporeTestPhotos();
         
         alert('✅ 已重新載入範例照片！');
@@ -862,25 +936,36 @@ export default {  setup() {
       }
     };
     
-    // 獲取行程列表
+    // 獲取行程列表    
     const loadItineraries = async () => {
       try {
         isLoading.value = true;
-        const response = await aiService.getItineraries();
+        
+        // 取得當前用戶
+        const user = getCurrentUser();
+        if (!user || !user.uid) {
+          errorMessage.value = '請先登入以獲取行程列表';
+          return;
+        }
+        
+        console.log('載入行程列表 - 用戶 ID:', user.uid);
+        const response = await aiService.getItineraries(user.uid);
         
         if (response.success && response.itineraries) {
           itineraries.value = response.itineraries;
+          console.log('成功載入行程數量:', response.itineraries.length);
         } else {
-          errorMessage.value = '無法獲取行程列表';
+          errorMessage.value = response.error || '無法獲取行程列表';
+          console.error('載入行程失敗:', response.error);
         }
       } catch (error) {
         console.error('獲取行程列表失敗:', error);
-        errorMessage.value = '載入行程列表出錯';
+        errorMessage.value = '載入行程列表出錯: ' + error.message;
       } finally {
         isLoading.value = false;
       }
     };
-    
+
     // 選擇行程
     const selectItinerary = async (itinerary) => {
       selectedItinerary.value = itinerary;
@@ -890,12 +975,20 @@ export default {  setup() {
       // 獲取行程詳細資訊
       await getItineraryDetails(itinerary.id);
     };
-    
-    // 獲取行程詳細資訊
+      // 獲取行程詳細資訊
     const getItineraryDetails = async (itineraryId) => {
       try {
         isLoading.value = true;
-        const response = await aiService.getItineraryById(itineraryId);
+        
+        // 取得當前用戶
+        const user = getCurrentUser();
+        if (!user || !user.uid) {
+          errorMessage.value = '請先登入以獲取行程詳細資料';
+          return;
+        }
+        
+        console.log('獲取行程詳細資料 - 用戶 ID:', user.uid, '行程 ID:', itineraryId);
+        const response = await aiService.getItineraryById(itineraryId, user.uid);
         
         if (response.success && response.itinerary) {
           const itinerary = response.itinerary;
@@ -946,7 +1039,8 @@ export default {  setup() {
         errorMessage.value = '載入行程詳細資料出錯';
       } finally {
         isLoading.value = false;
-      }    };    
+      }
+    };    
     
     // 選擇天數
     const selectDay = (day) => {
@@ -1158,10 +1252,11 @@ export default {  setup() {
       // 顯示行程選擇界面
       showItinerarySelector.value = true;
       loadItineraries();
-      
-      // 這裡是上傳照片的邏輯
+        // 這裡是上傳照片的邏輯
       console.log('準備上傳照片');
-    };      return {
+    };
+
+    return {
       handleUploadClick,
       showLoginPrompt,
       showItinerarySelector,
@@ -1208,8 +1303,8 @@ export default {  setup() {
       showPhotoManagement,
       testPhotoCount,
       userPhotoCount,
-      localPhotoCount,
-      refreshPhotos,
+      localPhotoCount,      refreshPhotos,
+      forceReloadPhotos,
       clearTestPhotos,
       reloadSamplePhotos,
       clearAllPhotos

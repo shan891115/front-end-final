@@ -15,12 +15,15 @@ export function checkEnvironmentVariables() {
   
   const missing = [];
   const present = [];
-
   requiredEnvVars.forEach(varName => {
     const value = import.meta.env[varName];
     if (value) {
       present.push(varName);
-      console.log(`✅ ${varName}: ${value.substring(0, 10)}...`);
+      // 只顯示前3個字符，其餘用星號隱藏，更安全
+      const maskedValue = value.length > 3 ? 
+        `${value.substring(0, 3)}${'*'.repeat(Math.min(value.length - 6, 10))}${value.slice(-3)}` : 
+        '***';
+      console.log(`✅ ${varName}: ${maskedValue}`);
     } else {
       missing.push(varName);
       console.error(`❌ ${varName}: 未設置`);

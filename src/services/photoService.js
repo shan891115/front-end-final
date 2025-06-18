@@ -46,11 +46,10 @@ try {
     app = initializeApp(firebaseConfig);
     console.log('創建新的 Firebase app 實例');
   }
-  
-  storage = getStorage(app);
+    storage = getStorage(app);
   db = getFirestore(app);
   console.log('Firebase Storage 和 Firestore 初始化成功');
-  console.log('Storage bucket:', import.meta.env.VITE_FIREBASE_STORAGE_BUCKET);
+  console.log('Storage bucket 已配置:', !!import.meta.env.VITE_FIREBASE_STORAGE_BUCKET);
 } catch (error) {
   console.error('Firebase 初始化失敗:', error);
   console.error('環境變數檢查:', {
@@ -69,13 +68,34 @@ const restorePhotosFromStorage = () => {
   try {
     const savedPhotos = localStorage.getItem('travel_photos');
     if (savedPhotos) {
-      const photosData = JSON.parse(savedPhotos);
+      const photosData = JSON.parse(savedPhotos);      
       photoDatabase.value = photosData.map(photo => ({
         ...photo,
         // 確保日期是 Date 物件
-        uploadDate: new Date(photo.uploadDate)
-      }));
-      console.log('從 localStorage 恢復照片:', photoDatabase.value.length, '張');
+        uploadDate: new Date(photo.uploadDate),
+        // 修正 isLocal 屬性：如果沒有設置，根據 imageUrl 判斷
+        isLocal: photo.isLocal !== undefined ? photo.isLocal : 
+                 (photo.imageUrl && photo.imageUrl.includes('firebasestorage.googleapis.com') ? false : true)
+      }));console.log('從 localStorage 恢復照片:', photoDatabase.value.length, '張');
+      
+      // 清理重複的照片資料
+      const uniquePhotos = [];
+      const seenIds = new Set();
+      
+      photoDatabase.value.forEach(photo => {
+        if (!seenIds.has(photo.id)) {
+          seenIds.add(photo.id);
+          uniquePhotos.push(photo);
+        }
+      });
+      
+      if (uniquePhotos.length !== photoDatabase.value.length) {
+        console.log(`初始化時清理重複照片：${photoDatabase.value.length} → ${uniquePhotos.length}`);
+        photoDatabase.value = uniquePhotos;
+        // 立即儲存清理後的資料
+        localStorage.setItem('travel_photos', JSON.stringify(photoDatabase.value));
+      }
+      
       console.log('恢復的照片分類分佈:', photoDatabase.value.reduce((acc, photo) => {
         acc[photo.category] = (acc[photo.category] || 0) + 1;
         return acc;
@@ -86,6 +106,9 @@ const restorePhotosFromStorage = () => {
   }
 };
 
+// 防抖儲存機制
+let saveTimer = null;
+
 // 將照片資料儲存到 localStorage
 const savePhotosToStorage = () => {
   try {
@@ -94,6 +117,17 @@ const savePhotosToStorage = () => {
   } catch (error) {
     console.warn('儲存照片資料失敗:', error);
   }
+};
+
+// 防抖儲存
+const debouncedSave = () => {
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+  }
+  saveTimer = setTimeout(() => {
+    savePhotosToStorage();
+    saveTimer = null;
+  }, 300); // 300ms 防抖
 };
 
 // 初始化時恢復資料
@@ -262,8 +296,8 @@ const photoService = {
             secondaryTag: localPhoto.secondaryTag
           });          uploadedPhotos.push(localPhoto);
           photoDatabase.value.push(localPhoto);
-          // 儲存到 localStorage
-          savePhotosToStorage();
+          // 儲存到 localStorage (使用防抖)
+          debouncedSave();
         }
       }
       
@@ -678,100 +712,183 @@ const photoService = {
     console.log('========================');
     
     return category;
-  },// 獲取照片列表
-  async getPhotos(categoryId = 'all', page = 1, pageSize = 12) {
-    console.log('=== getPhotos 開始 ===');
-    console.log('請求參數:', { categoryId, page, pageSize });
+  },  // 獲取照片列表 - 只返回當前用戶的照片
+  async getPhotos(categoryId = 'all', page = 1, pageSize = 12, forceRefresh = false) {    console.log('=== getPhotos 開始 ===');
+    console.log('請求參數:', { categoryId, page, pageSize, forceRefresh });
     console.log('本地照片數量:', photoDatabase.value.length);
     
-    // 優先使用本地資料，避免 Firestore 索引問題
-    if (photoDatabase.value.length > 0) {
-      console.log('使用本地資料進行篩選');
-      return this.getPhotosFromLocal(categoryId, page, pageSize);
+    // 取得當前用戶 - 檢查身份驗證狀態
+    let user = getCurrentUser();
+    console.log('身份驗證狀態:', isAuthenticated.value);
+    console.log('當前用戶物件:', user);
+    
+    // 如果 getCurrentUser 返回 null，嘗試從 localStorage 恢復
+    if (!user) {
+      try {
+        const savedUser = localStorage.getItem('user_info');
+        if (savedUser) {
+          user = JSON.parse(savedUser);
+          console.log('從 localStorage 恢復用戶資訊:', user);
+        }
+      } catch (error) {
+        console.warn('無法從 localStorage 恢復用戶資訊:', error);
+      }
     }
     
+    const currentUserId = user?.uid || 'anonymous';
+    console.log('最終用戶 ID:', currentUserId);// 由於 Firestore 索引問題，暫時優先使用本地資料
+    console.log('使用本地資料進行篩選（避免 Firestore 索引問題）');
+    const localResult = this.getPhotosFromLocal(categoryId, page, pageSize);
+    
+    // 如果本地沒有資料，再嘗試 Firestore
+    const localData = await localResult;    // 檢查是否本地已有該用戶的照片資料（避免重複查詢）
+    const hasUserPhotosInLocal = photoDatabase.value.some(photo => photo.userId === currentUserId);
+    
+    // 如果不是強制重新整理，且有本地資料，則使用本地資料
+    if (!forceRefresh && (localData.photos.length > 0 || hasUserPhotosInLocal)) {
+      // 如果有找到照片，或者本地已經有該用戶的照片資料，直接返回
+      console.log('使用本地快取資料（非強制重新整理）');
+      return localData;
+    }
+    
+    // 強制重新整理或本地無資料時，從 Firestore 查詢
+    if (forceRefresh) {
+      console.log('強制重新整理：清空本地快取並重新從 Firestore 載入');
+      // 清空該用戶的本地快取
+      photoDatabase.value = photoDatabase.value.filter(photo => photo.userId !== currentUserId);
+    }
+
+    // 本地沒有資料時才嘗試 Firestore
     try {
       if (!db) {
         console.log('Firestore 不可用，使用本地資料');
         return this.getPhotosFromLocal(categoryId, page, pageSize);
       }
 
-      console.log('嘗試從 Firestore 獲取照片...');
+      console.log('本地無資料，嘗試從 Firestore 獲取照片...');
       
-      // 從 Firestore 獲取照片 - 暫時簡化查詢避免索引問題
+      // 簡化查詢，避免索引問題 - 只查詢用戶 ID，不排序
       let photosQuery = collection(db, 'photos');
-      
-      // 暫時移除分類篩選，先取得所有照片
-      // TODO: 需要在 Firebase Console 建立 category 欄位的索引
-      // if (categoryId !== 'all') {
-      //   photosQuery = query(photosQuery, where('category', '==', categoryId));
-      // }
-      
-      // 按上傳時間排序
-      photosQuery = query(photosQuery, orderBy('uploadDate', 'desc'));
-      
-      // 分頁處理
-      if (page > 1) {
-        photosQuery = query(photosQuery, limit(pageSize * page));
-      } else {
-        photosQuery = query(photosQuery, limit(pageSize));
-      }
+      photosQuery = query(photosQuery, where('userId', '==', currentUserId));
       
       const querySnapshot = await getDocs(photosQuery);
-      const allPhotos = [];
-      
+      const userPhotos = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        allPhotos.push({
-          id: doc.id,
-          ...data,
-          uploadDate: data.uploadDate?.toDate ? data.uploadDate.toDate() : data.uploadDate
-        });
+        // 雙重檢查：確保這是當前用戶的照片
+        if (data.userId === currentUserId) {
+          userPhotos.push({
+            id: doc.id,
+            ...data,
+            isLocal: false, // 從 Firestore 載入的照片標記為雲端照片
+            uploadDate: data.uploadDate?.toDate ? data.uploadDate.toDate() : data.uploadDate
+          });
+        }
+      });
+      
+      console.log(`從 Firestore 獲取到用戶 ${currentUserId} 的照片數量:`, userPhotos.length);
+      
+      // 在客戶端進行排序（按上傳時間降序）
+      userPhotos.sort((a, b) => {
+        const dateA = new Date(a.uploadDate);
+        const dateB = new Date(b.uploadDate);
+        return dateB - dateA;
       });
       
       // 在客戶端進行分類篩選
-      let filteredPhotos = allPhotos;
+      let filteredPhotos = userPhotos;
       if (categoryId !== 'all') {
-        filteredPhotos = allPhotos.filter(photo => photo.category === categoryId);
-        console.log(`Firestore 客戶端篩選 ${categoryId}：${allPhotos.length} → ${filteredPhotos.length}`);
+        filteredPhotos = userPhotos.filter(photo => photo.category === categoryId);
+        console.log(`客戶端篩選 ${categoryId}：${userPhotos.length} → ${filteredPhotos.length}`);
       }
       
-      // 分頁處理
-      let paginatedPhotos = filteredPhotos;
-      if (page > 1) {
-        const startIndex = (page - 1) * pageSize;
-        paginatedPhotos = filteredPhotos.slice(startIndex, startIndex + pageSize);
-      }
+      // 客戶端分頁處理
+      const startIndex = (page - 1) * pageSize;
+      const paginatedPhotos = filteredPhotos.slice(startIndex, startIndex + pageSize);
       
-      console.log('Firestore 查詢成功，返回照片數量:', paginatedPhotos.length);
+      console.log('Firestore 查詢成功，返回用戶照片數量:', paginatedPhotos.length);
+        // 將資料也儲存到本地快取，避免下次重複查詢
+      if (userPhotos.length > 0) {
+        console.log('將 Firestore 照片資料儲存到本地快取');
+        // 去重處理：避免重複添加已存在的照片
+        const existingIds = new Set(photoDatabase.value.map(photo => photo.id));
+        const newPhotos = userPhotos.filter(photo => !existingIds.has(photo.id));        if (newPhotos.length > 0) {
+          console.log(`新增 ${newPhotos.length} 張新照片到本地快取`);
+          photoDatabase.value = [...photoDatabase.value, ...newPhotos];
+          
+          // 額外的去重處理：清理本地快取中可能存在的重複照片
+          const uniquePhotos = [];
+          const seenIds = new Set();
+          
+          photoDatabase.value.forEach(photo => {
+            if (!seenIds.has(photo.id)) {
+              seenIds.add(photo.id);
+              uniquePhotos.push(photo);
+            }
+          });
+          
+          if (uniquePhotos.length !== photoDatabase.value.length) {
+            console.log(`清理重複照片：${photoDatabase.value.length} → ${uniquePhotos.length}`);
+            photoDatabase.value = uniquePhotos;
+          }
+          
+          debouncedSave();
+        } else {
+          console.log('沒有新照片需要添加到快取');
+        }
+      }
       
       return {
         success: true,
         photos: paginatedPhotos,
         total: filteredPhotos.length,
-        hasMore: filteredPhotos.length > pageSize
+        hasMore: startIndex + pageSize < filteredPhotos.length
       };
       
     } catch (error) {
       console.error('從 Firestore 獲取照片失敗:', error);
+      console.log('回退到本地資料模式');
       // 如果 Firestore 失敗，使用本地資料作為備用
       return this.getPhotosFromLocal(categoryId, page, pageSize);
     }
-  },  // 從本地獲取照片（備用方案）
+  },// 從本地獲取照片（備用方案）- 只返回當前用戶的照片
   getPhotosFromLocal(categoryId = 'all', page = 1, pageSize = 12) {
     return new Promise((resolve) => {
       setTimeout(() => {
         console.log('=== 本地照片篩選 ===');
         console.log('請求分類:', categoryId);
         console.log('本地照片總數:', photoDatabase.value.length);
+          // 取得當前用戶 - 同樣檢查身份驗證狀態
+        let user = getCurrentUser();
+        
+        // 如果 getCurrentUser 返回 null，嘗試從 localStorage 恢復
+        if (!user) {
+          try {
+            const savedUser = localStorage.getItem('user_info');
+            if (savedUser) {
+              user = JSON.parse(savedUser);
+              console.log('本地篩選：從 localStorage 恢復用戶資訊:', user);
+            }
+          } catch (error) {
+            console.warn('本地篩選：無法從 localStorage 恢復用戶資訊:', error);
+          }
+        }
+        
+        const currentUserId = user?.uid || 'anonymous';
+        console.log('當前用戶 ID:', currentUserId);
         
         let filteredPhotos = [...photoDatabase.value];
         
+        // 首先按用戶過濾 - 只顯示當前用戶的照片
+        const beforeUserFilter = filteredPhotos.length;
+        filteredPhotos = filteredPhotos.filter(photo => photo.userId === currentUserId);
+        console.log(`用戶篩選結果：${beforeUserFilter} → ${filteredPhotos.length} 張 (用戶: ${currentUserId})`);
+        
         // 按類別過濾
         if (categoryId !== 'all') {
-          const beforeFilter = filteredPhotos.length;
+          const beforeCategoryFilter = filteredPhotos.length;
           filteredPhotos = filteredPhotos.filter(photo => photo.category === categoryId);
-          console.log(`篩選結果：${beforeFilter} → ${filteredPhotos.length} 張 (${categoryId})`);
+          console.log(`分類篩選結果：${beforeCategoryFilter} → ${filteredPhotos.length} 張 (${categoryId})`);
         }
         
         // 按上傳時間排序 (最新的先顯示)
@@ -781,7 +898,21 @@ const photoService = {
         const startIndex = (page - 1) * pageSize;
         const paginatedPhotos = filteredPhotos.slice(startIndex, startIndex + pageSize);
         
-        console.log('最終返回:', paginatedPhotos.length, '張照片');
+        console.log('最終返回當前用戶照片:', paginatedPhotos.length, '張照片');
+        
+        // 調試：顯示照片的詳細資訊
+        if (paginatedPhotos.length > 0) {
+          console.log('照片詳細資訊:');
+          paginatedPhotos.forEach((photo, index) => {
+            console.log(`  照片 ${index + 1}:`, {
+              id: photo.id,
+              category: photo.category,
+              imageUrl: photo.imageUrl?.substring(0, 100) + '...',
+              isLocal: photo.isLocal,
+              uploadDate: photo.uploadDate
+            });
+          });
+        }
         
         resolve({
           success: true,
@@ -833,13 +964,20 @@ const photoService = {
       console.error('刪除照片失敗:', error);
       throw new Error(`刪除照片失敗: ${error.message}`);
     }
-  },
-  // 添加範例照片 (用於演示)
+  },  // 添加範例照片 (用於演示) - 綁定到當前用戶
   addSamplePhotos() {
-    // 避免重複添加範例照片
-    if (photoDatabase.value.some(photo => photo.id.startsWith('sample_'))) {
-      console.log('範例照片已存在，跳過添加');
-      return photoDatabase.value.filter(photo => photo.id.startsWith('sample_'));
+    // 取得當前用戶
+    const user = getCurrentUser();
+    const currentUserId = user?.uid || 'anonymous';
+    console.log('添加範例照片 - 當前用戶 ID:', currentUserId);
+    
+    // 避免重複添加範例照片 - 檢查當前用戶是否已有範例照片
+    const existingSamplePhotos = photoDatabase.value.filter(photo => 
+      photo.userId === currentUserId && photo.id.startsWith('sample_')
+    );
+    if (existingSamplePhotos.length > 0) {
+      console.log('當前用戶的範例照片已存在，跳過添加');
+      return existingSamplePhotos;
     }
     
     const samplePhotos = [
@@ -852,7 +990,7 @@ const photoService = {
         category: 'nature',
         uploadDate: new Date(Date.now() - 3600000 * 24 * 2),
         likes: 15,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '挪威',
         secondaryTag: '第1天',
         notes: '絕美的峽灣風景，讓人讚嘆大自然的鬼斧神工',
@@ -866,7 +1004,7 @@ const photoService = {
         category: 'nature',
         uploadDate: new Date(Date.now() - 3600000 * 18),
         likes: 12,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '台灣',
         secondaryTag: '第2天',
         notes: '春天的陽明山櫻花盛開，美不勝收',
@@ -881,7 +1019,7 @@ const photoService = {
         category: 'city',
         uploadDate: new Date(Date.now() - 3600000 * 24),
         likes: 10,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '日本',
         secondaryTag: '第1天',
         notes: '繁華的東京街頭，感受都市的脈動',
@@ -895,7 +1033,7 @@ const photoService = {
         category: 'city',
         uploadDate: new Date(Date.now() - 3600000 * 20),
         likes: 18,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '新加坡',
         secondaryTag: '第1天',
         notes: '新加坡最具代表性的現代建築',
@@ -910,7 +1048,7 @@ const photoService = {
         category: 'food',
         uploadDate: new Date(Date.now() - 3600000 * 12),
         likes: 8,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '義大利',
         secondaryTag: '第2天',
         notes: '道地的義大利披薩，薄脆餅皮配上新鮮食材',
@@ -924,7 +1062,7 @@ const photoService = {
         category: 'food',
         uploadDate: new Date(Date.now() - 3600000 * 8),
         likes: 14,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '新加坡',
         secondaryTag: '第2天',
         notes: '品嚐新加坡道地小吃，海南雞飯超級美味',
@@ -939,7 +1077,7 @@ const photoService = {
         category: 'culture',
         uploadDate: new Date(Date.now() - 3600000 * 6),
         likes: 12,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '印度',
         secondaryTag: '第1天',
         notes: '壯麗的建築藝術，見證了不朽的愛情故事',
@@ -953,7 +1091,7 @@ const photoService = {
         category: 'culture',
         uploadDate: new Date(Date.now() - 3600000 * 4),
         likes: 9,
-        userId: 'sample-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '新加坡',
         secondaryTag: '第3天',
         notes: '莊嚴肅穆的佛教聖地，體驗宗教文化之美',
@@ -964,7 +1102,7 @@ const photoService = {
     // 儲存範例照片到 localStorage
     savePhotosToStorage();
     
-    console.log('已添加範例照片，各分類數量:', {
+    console.log('已為用戶', currentUserId, '添加範例照片，各分類數量:', {
       nature: samplePhotos.filter(p => p.category === 'nature').length,
       city: samplePhotos.filter(p => p.category === 'city').length,
       food: samplePhotos.filter(p => p.category === 'food').length,
@@ -972,9 +1110,13 @@ const photoService = {
       total: samplePhotos.length
     });
     
-    return samplePhotos;},
-  // 添加新加坡測試照片（模擬用戶之前的上傳）
+    return samplePhotos;},// 添加新加坡測試照片（模擬用戶之前的上傳）- 綁定到當前用戶
   addSingaporeTestPhotos() {
+    // 取得當前用戶
+    const user = getCurrentUser();
+    const currentUserId = user?.uid || 'anonymous';
+    console.log('添加測試照片 - 當前用戶 ID:', currentUserId);
+    
     // 模擬您之前上傳的新加坡照片
     const singaporePhotos = [
       {
@@ -988,7 +1130,7 @@ const photoService = {
         category: this.determineCategoryFromAttraction('濱海藝術中心 (Esplanade - Theatres on the Bay)'),
         uploadDate: new Date(Date.now() - 3600000 * 2),
         likes: 8,
-        userId: 'test-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '新加坡',
         secondaryTag: '第1天',
         notes: '新加坡濱海藝術中心，造型獨特的表演場館',
@@ -1007,7 +1149,7 @@ const photoService = {
         category: this.determineCategoryFromAttraction('濱海灣金沙酒店'),
         uploadDate: new Date(Date.now() - 3600000 * 3),
         likes: 12,
-        userId: 'test-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '新加坡',
         secondaryTag: '第1天',
         notes: '濱海灣金沙的獨特造型令人印象深刻',
@@ -1026,7 +1168,7 @@ const photoService = {
         category: this.determineCategoryFromAttraction('Gardens by the Bay'),
         uploadDate: new Date(Date.now() - 3600000 * 4),
         likes: 15,
-        userId: 'test-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '新加坡',
         secondaryTag: '第2天',
         notes: '超級樹的夜景非常壯觀',
@@ -1045,7 +1187,7 @@ const photoService = {
         category: this.determineCategoryFromAttraction('老巴剎美食中心'),
         uploadDate: new Date(Date.now() - 3600000 * 1),
         likes: 9,
-        userId: 'test-user',
+        userId: currentUserId, // 使用當前用戶 ID
         primaryTag: '新加坡',
         secondaryTag: '第2天',
         notes: '品嚐道地的新加坡美食',
@@ -1055,7 +1197,7 @@ const photoService = {
       }
     ];
 
-    console.log('添加新加坡測試照片:', singaporePhotos.length, '張');
+    console.log('添加新加坡測試照片給用戶', currentUserId + ':', singaporePhotos.length, '張');
     singaporePhotos.forEach(photo => {
       console.log(`- ${photo.attraction.name}: ${photo.category}`);
     });
@@ -1064,18 +1206,27 @@ const photoService = {
     savePhotosToStorage();
     
     return singaporePhotos;
-  },
-  // 清除測試照片
+  },// 清除測試照片 - 只清除當前用戶的測試照片
   async clearTestPhotos() {
     try {
+      // 取得當前用戶
+      const user = getCurrentUser();
+      const currentUserId = user?.uid || 'anonymous';
+      console.log('清除測試照片 - 當前用戶 ID:', currentUserId);
+      
       const originalCount = photoDatabase.value.length;
       
-      // 只保留非測試照片（排除 singapore_ 和 sample_ 開頭的）
-      const filteredPhotos = photoDatabase.value.filter(photo => 
-        !photo.id.startsWith('singapore_') && !photo.id.startsWith('sample_')
+      // 篩選要刪除的照片：測試照片且屬於當前用戶
+      const photosToRemove = photoDatabase.value.filter(photo => 
+        photo.userId === currentUserId && (photo.id.startsWith('singapore_') || photo.id.startsWith('sample_'))
       );
       
-      const removedCount = originalCount - filteredPhotos.length;
+      // 保留其他照片（其他用戶的照片 + 當前用戶的非測試照片）
+      const filteredPhotos = photoDatabase.value.filter(photo => 
+        photo.userId !== currentUserId || (!photo.id.startsWith('singapore_') && !photo.id.startsWith('sample_'))
+      );
+      
+      const removedCount = photosToRemove.length;
       
       if (removedCount === 0) {
         return {
@@ -1091,7 +1242,7 @@ const photoService = {
       // 更新 localStorage
       savePhotosToStorage();
       
-      console.log(`成功清除 ${removedCount} 張測試照片，剩餘 ${filteredPhotos.length} 張照片`);
+      console.log(`成功清除當前用戶的 ${removedCount} 張測試照片，剩餘 ${filteredPhotos.length} 張照片`);
       
       return {
         success: true,
@@ -1108,24 +1259,36 @@ const photoService = {
       };
     }
   },
-
-  // 清空所有照片
+  // 清空所有照片 - 只清空當前用戶的照片
   async clearAllPhotos() {
     try {
+      // 取得當前用戶
+      const user = getCurrentUser();
+      const currentUserId = user?.uid || 'anonymous';
+      console.log('清空照片 - 當前用戶 ID:', currentUserId);
+      
       const originalCount = photoDatabase.value.length;
       
-      // 清空記憶體中的照片資料
-      photoDatabase.value = [];
+      // 篩選要刪除的照片：屬於當前用戶的照片
+      const photosToRemove = photoDatabase.value.filter(photo => photo.userId === currentUserId);
       
-      // 清空 localStorage
-      localStorage.removeItem('travel_photos');
+      // 保留其他用戶的照片
+      const filteredPhotos = photoDatabase.value.filter(photo => photo.userId !== currentUserId);
       
-      console.log(`已清空所有 ${originalCount} 張照片`);
+      const removedCount = photosToRemove.length;
+      
+      // 更新記憶體中的照片資料
+      photoDatabase.value = filteredPhotos;
+      
+      // 更新 localStorage
+      savePhotosToStorage();
+      
+      console.log(`已清空當前用戶的 ${removedCount} 張照片，剩餘其他用戶的 ${filteredPhotos.length} 張照片`);
       
       return {
         success: true,
-        removedCount: originalCount,
-        message: `已清空所有 ${originalCount} 張照片`
+        removedCount,
+        message: `已清空您的 ${removedCount} 張照片`
       };
       
     } catch (error) {
@@ -1136,25 +1299,31 @@ const photoService = {
       };
     }
   },
-
-  // 獲取照片統計資訊
+  // 獲取照片統計資訊 - 只計算當前用戶的照片
   getPhotoStats() {
-    const total = photoDatabase.value.length;
-    const testPhotos = photoDatabase.value.filter(photo => 
+    // 取得當前用戶
+    const user = getCurrentUser();
+    const currentUserId = user?.uid || 'anonymous';
+    
+    // 篩選出當前用戶的照片
+    const userPhotos = photoDatabase.value.filter(photo => photo.userId === currentUserId);
+    
+    const total = userPhotos.length;
+    const testPhotos = userPhotos.filter(photo => 
       photo.id.startsWith('singapore_') || photo.id.startsWith('sample_')
     ).length;
-    const userPhotos = total - testPhotos;
-    const localPhotos = photoDatabase.value.filter(photo => photo.isLocal).length;
+    const realUserPhotos = total - testPhotos;
+    const localPhotos = userPhotos.filter(photo => photo.isLocal).length;
     
     const categories = {};
-    photoDatabase.value.forEach(photo => {
+    userPhotos.forEach(photo => {
       categories[photo.category] = (categories[photo.category] || 0) + 1;
     });
     
     return {
       total,
       testPhotos,
-      userPhotos,
+      userPhotos: realUserPhotos,
       localPhotos,
       categories
     };
@@ -1264,6 +1433,43 @@ const photoService = {
       return false;
     }
   },
+
+  // 強制重新載入照片（清除快取）
+  async forceReloadPhotos() {
+    const user = getCurrentUser();
+    if (!user && localStorage.getItem('user_info')) {
+      try {
+        user = JSON.parse(localStorage.getItem('user_info'));
+      } catch (error) {
+        console.warn('無法從 localStorage 恢復用戶資訊:', error);
+      }
+    }
+    
+    const currentUserId = user?.uid || 'anonymous';
+    console.log('強制重新載入照片 - 用戶 ID:', currentUserId);
+    
+    // 清空該用戶的本地快取
+    const beforeCount = photoDatabase.value.length;
+    photoDatabase.value = photoDatabase.value.filter(photo => photo.userId !== currentUserId);
+    const afterCount = photoDatabase.value.length;
+    
+    console.log(`清空用戶快取：${beforeCount} → ${afterCount}`);
+    
+    // 儲存清理後的快取
+    debouncedSave();
+    
+    // 重新從 Firestore 載入
+    return this.getPhotos('all', 1, 12, true);
+  },
 };
 
 export default photoService;
+
+// 建議的用戶分離結構選項：
+  // 如果要改為用戶分離的 Firestore 結構，可以這樣做：
+  
+  // 選項A：完全分離（推薦用於大型應用）
+  // users/{userId}/photos/{photoId}
+  
+  // 選項B：混合結構（推薦用於需要全站統計的應用）  
+  // 保持現有 photos/ 結構，同時在 users/{userId}/photos/ 建立參考

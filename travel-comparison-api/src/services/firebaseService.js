@@ -85,7 +85,7 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
         throw new Error('Firebase 數據庫未初始化');
       }
       
-      const testRef = database.ref('some_path/tests');
+      const testRef = database.ref('tests');
       const newTestRef = testRef.push();
       await newTestRef.set(testData);
       return {
@@ -104,7 +104,7 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
         throw new Error('Firebase 數據庫未初始化');
       }
       
-      await database.ref(`some_path/tests/${id}`).remove();
+      await database.ref(`tests/${id}`).remove();
       return true;
     } catch (error) {
       console.error('刪除測試數據錯誤:', error);
@@ -119,7 +119,7 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
       }
       
       // 使用 Admin SDK 生成唯一 ID 並儲存資料
-      const comparisonsRef = database.ref('some_path/comparisons');
+      const comparisonsRef = database.ref('comparisons');
       const newComparisonRef = comparisonsRef.push();
     
       // 添加時間戳和過期時間 (預設7天)
@@ -156,7 +156,7 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
       }
       
       // 使用 Admin SDK 獲取數據
-      const comparisonRef = database.ref(`some_path/comparisons/${id}`);
+      const comparisonRef = database.ref(`comparisons/${id}`);
       const snapshot = await comparisonRef.once('value');
       
       if (snapshot.exists()) {
@@ -178,17 +178,20 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
       throw error;
     }
   }
-  
-  // 儲存行程，返回唯一ID
+    // 儲存行程，返回唯一ID (按用戶分離)
   async saveItinerary(itineraryData) {
     try {
       if (!database) {
         throw new Error('Firebase 數據庫未初始化');
       }
-      
-      // 使用 Admin SDK 生成唯一 ID 並儲存資料
-      const itinerariesRef = database.ref('some_path/itineraries');
-      const newItineraryRef = itinerariesRef.push();
+
+      const { userId } = itineraryData;
+      if (!userId) {
+        throw new Error('缺少用戶 ID');
+      }
+        // 使用用戶 ID 建立專屬路徑
+      const userItinerariesRef = database.ref(`users/${userId}/itineraries`);
+      const newItineraryRef = userItinerariesRef.push();
     
       // 添加時間戳和過期時間 (預設30天)
       const timestamp = Date.now();
@@ -206,6 +209,8 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
       // 使用 Admin SDK 儲存資料
       await newItineraryRef.set(dataToSave);
       
+      console.log(`行程已儲存到用戶 ${userId} 的專屬路徑:`, newItineraryRef.key);
+      
       // 返回生成的 ID
       return {
           id: newItineraryRef.key,
@@ -216,16 +221,18 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
       throw error;
     }
   }
-  
-  // 根據 ID 獲取行程
-  async getItinerary(id) {
+    // 根據 ID 獲取行程 (需要用戶 ID 以確保安全性)
+  async getItinerary(id, userId) {
     try {
       if (!database) {
         throw new Error('Firebase 數據庫未初始化');
       }
-      
-      // 使用 Admin SDK 獲取數據
-      const itineraryRef = database.ref(`some_path/itineraries/${id}`);
+
+      if (!userId) {
+        throw new Error('缺少用戶 ID');
+      }
+        // 使用用戶專屬路徑獲取數據
+      const itineraryRef = database.ref(`users/${userId}/itineraries/${id}`);
       const snapshot = await itineraryRef.once('value');
       
       if (snapshot.exists()) {
@@ -256,7 +263,7 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
       }
       
       // 使用 Admin SDK 獲取數據
-      const itinerariesRef = database.ref('some_path/itineraries');
+      const itinerariesRef = database.ref('itineraries');
       const snapshot = await itinerariesRef.once('value');
       
       if (snapshot.exists()) {
@@ -279,6 +286,123 @@ class FirebaseService {    // 測試 Firebase 連接和身份驗證
       }
     } catch (error) {
       console.error('獲取行程列表錯誤:', error);
+      throw error;
+    }
+  }
+  // 獲取特定用戶的行程列表
+  async getUserItineraries(userId) {
+    try {
+      if (!database) {
+        throw new Error('Firebase 數據庫未初始化');
+      }
+
+      if (!userId) {
+        throw new Error('缺少用戶 ID');
+      }
+      
+      console.log(`正在獲取用戶 ${userId} 的行程列表...`);
+      
+      // 首先嘗試從新路徑獲取
+      const userItinerariesRef = database.ref(`users/${userId}/itineraries`);
+      const snapshot = await userItinerariesRef.once('value');
+      
+      if (snapshot.exists()) {
+        console.log(`在新路徑找到用戶 ${userId} 的行程資料`);
+        const itineraries = [];
+        snapshot.forEach(childSnapshot => {
+          const data = childSnapshot.val();
+          
+          // 檢查是否已過期
+          if (!data.expiresAt || data.expiresAt > Date.now()) {
+            itineraries.push({
+              id: childSnapshot.key,
+              ...data
+            });
+          } else {
+            // 如果已過期，刪除該項目
+            childSnapshot.ref.remove().catch(error => {
+              console.error('刪除過期行程失敗:', error);
+            });
+          }
+        });
+        
+        // 按建立時間降序排序 (最新的在前面)
+        itineraries.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        
+        console.log(`用戶 ${userId} 的行程數量:`, itineraries.length);
+        return itineraries;
+      } else {
+        console.log(`新路徑沒有找到用戶 ${userId} 的行程，檢查舊路徑...`);
+        
+        // 嘗試從舊路徑獲取並遷移 (如果有的話)
+        const oldItinerariesRef = database.ref(`some_path/users/${userId}/itineraries`);
+        const oldSnapshot = await oldItinerariesRef.once('value');
+        
+        if (oldSnapshot.exists()) {
+          console.log(`在舊路徑找到用戶 ${userId} 的行程，開始遷移...`);
+          const itineraries = [];
+          const migrationPromises = [];
+          
+          oldSnapshot.forEach(childSnapshot => {
+            const data = childSnapshot.val();
+            
+            // 檢查是否已過期
+            if (!data.expiresAt || data.expiresAt > Date.now()) {
+              itineraries.push({
+                id: childSnapshot.key,
+                ...data
+              });
+              
+              // 遷移到新路徑
+              const migrationPromise = userItinerariesRef.child(childSnapshot.key).set(data)
+                .then(() => {
+                  console.log(`已遷移行程 ${childSnapshot.key} 到新路徑`);
+                  // 刪除舊路徑的資料
+                  return childSnapshot.ref.remove();
+                })
+                .catch(error => {
+                  console.error(`遷移行程 ${childSnapshot.key} 失敗:`, error);
+                });
+              
+              migrationPromises.push(migrationPromise);
+            }
+          });
+          
+          // 等待所有遷移完成
+          await Promise.all(migrationPromises);
+          
+          // 按建立時間降序排序
+          itineraries.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          
+          console.log(`用戶 ${userId} 的行程遷移完成，數量:`, itineraries.length);
+          return itineraries;
+        } else {          console.log(`用戶 ${userId} 沒有任何行程資料`);
+          return [];
+        }
+      }
+    } catch (error) {
+      console.error('獲取用戶行程列表錯誤:', error);      throw error;
+    }
+  }
+
+  // 刪除特定用戶的指定行程
+  async deleteUserItinerary(userId, itineraryId) {
+    try {
+      if (!database) {
+        throw new Error('Firebase 數據庫未初始化');
+      }
+
+      if (!userId || !itineraryId) {
+        throw new Error('缺少用戶 ID 或行程 ID');
+      }
+        // 使用用戶專屬路徑刪除特定行程
+      const itineraryRef = database.ref(`users/${userId}/itineraries/${itineraryId}`);
+      await itineraryRef.remove();
+      
+      console.log(`已刪除用戶 ${userId} 的行程 ${itineraryId}`);
+      return { success: true };
+    } catch (error) {
+      console.error('刪除用戶行程錯誤:', error);
       throw error;
     }
   }

@@ -5,7 +5,19 @@ const firebaseService = require('../services/firebaseService');
 
 // 為所有 AI 路由添加 CORS 中間件
 router.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://front-end-final-tawny.vercel.app');
+  // 允許的來源列表 - 包含生產環境和本地開發環境
+  const allowedOrigins = [
+    'https://front-end-final-tawny.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -1728,7 +1740,18 @@ function intelligentMergeContent(originalContent, newContent, analysis) {
 // 儲存行程到 Firebase
 router.post('/save-itinerary', async (req, res) => {
   // 設置 CORS 標頭
-  res.header('Access-Control-Allow-Origin', 'https://front-end-final-tawny.vercel.app');
+  const allowedOrigins = [
+    'https://front-end-final-tawny.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -1741,6 +1764,14 @@ router.post('/save-itinerary', async (req, res) => {
       return res.status(400).json({
         success: false,
         error: '行程內容不能為空'
+      });
+    }
+
+    // 檢查用戶 ID
+    if (!itineraryData.userId) {
+      return res.status(400).json({
+        success: false,
+        error: '缺少用戶識別資訊，請重新登入'
       });
     }
 
@@ -1820,10 +1851,19 @@ router.post('/save-itinerary', async (req, res) => {
   }
 });
 
-// 獲取所有行程列表
+// 獲取所有行程列表 (按用戶過濾)
 router.get('/itineraries', async (req, res) => {
   try {
-    const itineraries = await firebaseService.getAllItineraries();
+    const { userId } = req.query; // 從查詢參數獲取用戶 ID
+    
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: '缺少用戶識別資訊'
+      });
+    }
+    
+    const itineraries = await firebaseService.getUserItineraries(userId);
     
     res.json({
       success: true,
@@ -1840,10 +1880,11 @@ router.get('/itineraries', async (req, res) => {
   }
 });
 
-// 獲取指定ID的行程
+// 獲取指定ID的行程 (需要用戶ID以確保安全性)
 router.get('/itineraries/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const { userId } = req.query; // 從查詢參數獲取用戶 ID
     
     if (!id) {
       return res.status(400).json({
@@ -1851,13 +1892,20 @@ router.get('/itineraries/:id', async (req, res) => {
         error: '行程ID不能為空'
       });
     }
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: '缺少用戶識別資訊'
+      });
+    }
     
-    const itinerary = await firebaseService.getItinerary(id);
+    const itinerary = await firebaseService.getItinerary(id, userId);
     
     if (!itinerary) {
       return res.status(404).json({
         success: false,
-        error: '找不到指定ID的行程'
+        error: '找不到指定ID的行程或您沒有權限訪問該行程'
       });
     }
     
@@ -2257,5 +2305,59 @@ function extractDayBlocks(content) {
   
   return blocks;
 }
+
+// 刪除指定用戶的指定行程
+router.delete('/itineraries/:id', async (req, res) => {
+  // 設置 CORS 標頭
+  const allowedOrigins = [
+    'https://front-end-final-tawny.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  try {
+    const { id } = req.params;
+    const { userId } = req.query; // 從查詢參數獲取用戶 ID
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: '行程ID不能為空'
+      });
+    }
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: '缺少用戶識別資訊'
+      });
+    }
+    
+    await firebaseService.deleteUserItinerary(userId, id);
+    
+    res.json({
+      success: true,
+      message: '行程已成功刪除'
+    });
+    
+  } catch (error) {
+    console.error('刪除行程錯誤:', error);
+    res.status(500).json({
+      success: false,
+      error: '無法刪除行程',
+      message: error.message
+    });
+  }
+});
 
 module.exports = router;

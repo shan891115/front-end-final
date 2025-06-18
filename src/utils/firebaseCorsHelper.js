@@ -13,7 +13,7 @@ const envCheck = {
 };
 
 console.log('環境變數檢查:', envCheck);
-console.log('Storage Bucket:', import.meta.env.VITE_FIREBASE_STORAGE_BUCKET);
+console.log('Storage Bucket 已設定:', !!import.meta.env.VITE_FIREBASE_STORAGE_BUCKET);
 
 // 2. CORS 解決方案
 
