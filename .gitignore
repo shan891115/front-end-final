@@ -80,3 +80,11 @@ travel-comparison-api/test-*.js
 # Photo category demo and test pages
 photo-category-demo.html
 attraction-category-test.html
+
+# Ignore all .md files except README.md
+*.md
+!README.md
+
+# Ignore script files
+*.bat
+*.ps1
