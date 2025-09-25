@@ -23,8 +23,19 @@
             <h2>輸入旅遊網址進行比較</h2>
             <div v-for="(item, index) in travelUrls" :key="index" class="url-input-group">
               <div class="input-row">
-                <input type="url" v-model="item.url" placeholder="例：https://www.example.com/travel-article" required class="url-input">
-                <input type="text" v-model="item.title" placeholder="網址標題 (可選)" class="title-input">
+                <input 
+                  type="url" 
+                  v-model="item.url" 
+                  placeholder="例：https://www.example.com/travel-article" 
+                  required 
+                  class="url-input placeholder-gray-400"
+                >
+                <input 
+                  type="text" 
+                  v-model="item.title" 
+                  placeholder="網址標題 (可選)" 
+                  class="title-input placeholder-gray-400"
+                >
                 <button type="button" @click="removeUrlField(index)" v-if="travelUrls.length > 1" class="remove-btn">移除</button>
               </div>
             </div>
@@ -190,7 +201,13 @@
               </div>
             </div>
             <form @submit.prevent="sendMessage" class="chat-input-form">
-              <input type="text" v-model="userPrompt" placeholder="針對比較結果提問..." :disabled="isLoading" class="chat-input">
+              <input 
+                type="text" 
+                v-model="userPrompt" 
+                placeholder="針對比較結果提問..." 
+                :disabled="isLoading" 
+                class="chat-input placeholder-gray-700"
+              >
               <button type="submit" :disabled="isLoading || !userPrompt.trim()" class="send-btn">
                 {{ isLoading && userPrompt ? '傳送中...' : '傳送' }}
               </button>
