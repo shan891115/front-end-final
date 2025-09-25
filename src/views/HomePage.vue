@@ -13,7 +13,7 @@
     <!-- 熱門目的地區段 -->
     <section id="destinations" class="flex justify-center py-16 bg-gray-100 relative">
       <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12 pb-4">熱門旅遊目的地</h2>
+        <h2 class="text-3xl font-bold text-center mb-12 pb-4 text-gray-800">熱門旅遊目的地</h2>
           <!-- 卡片容器 - 限制為固定寬度以顯示恰好3張卡片 -->
         <div class="destinations-group group relative overflow-hidden max-w-8xl mx-auto flex justify-center">
           <!-- 左側箭頭 -->
@@ -29,7 +29,7 @@
                   <img src="/images/destinations/海灘.jpg.webp" alt="海灘度假勝地" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                 </div>
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">海灘度假勝地</h3>
+                  <h3 class="font-bold text-xl mb-3 text-gray-800">海灘度假勝地</h3>
                   <p class="text-gray-700 pb-4">享受陽光、沙灘和海浪，放鬆身心的完美去處。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('beach')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
@@ -44,7 +44,7 @@
                   <img src="/images/destinations/山脈風景.jpg" alt="山區探險行程" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                 </div>
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">山區探險行程</h3>
+                  <h3 class="font-bold text-xl mb-3 text-gray-800">山區探險行程</h3>
                   <p class="text-gray-700 pb-4">探索壯麗的山脈風景，體驗刺激的戶外活動。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('mountain')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
@@ -59,7 +59,7 @@
                   <img src="/images/destinations/歷史博物館.png" alt="文化城市之旅" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                 </div>
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">文化城市之旅</h3>
+                  <h3 class="font-bold text-xl mb-3 text-gray-800">文化城市之旅</h3>
                   <p class="text-gray-700 pb-4">沉浸在豐富的歷史和文化中，參觀博物館和歷史建築。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('city')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
@@ -74,7 +74,7 @@
                   <img src="/images/destinations/古代遺跡.jpg" alt="古老神秘遺跡" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                 </div>
                 <div class="p-8">                  
-                  <h3 class="font-bold text-xl mb-3">古老神秘遺跡</h3>
+                  <h3 class="font-bold text-xl mb-3 text-gray-800">古老神秘遺跡</h3>
                   <p class="text-gray-700 pb-4">探索古代文明的遺跡，了解歷史文化的演變與故事。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('ruins')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">
@@ -89,7 +89,7 @@
                   <img src="/images/destinations/熱帶島嶼.jpg" alt="島嶼冒險之旅" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                 </div>
                 <div class="p-8">
-                  <h3 class="font-bold text-xl mb-3">島嶼冒險之旅</h3>
+                  <h3 class="font-bold text-xl mb-3 text-gray-800">島嶼冒險之旅</h3>
                   <p class="text-gray-700 pb-4">探索熱帶島嶼的奇特風光，體驗獨特的自然景觀與文化。</p>
                   <div class="flex justify-end mt-6">
                     <button @click="showDestinationDetail('island')" class="bg-emerald-500 text-white px-5 py-2.5 rounded hover:bg-emerald-600 transition-colors">

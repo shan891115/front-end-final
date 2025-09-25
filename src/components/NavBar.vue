@@ -93,7 +93,7 @@
                         <!-- 手機版漢堡選單按鈕 -->
                         <button 
                             @click="toggleMobileMenu" 
-                            class="lg:hidden flex items-center justify-center w-10 h-10 rounded-md hover:bg-gray-100 transition-colors text-gray-700 hover:text-green-600"
+                            class="lg:hidden flex items-center justify-center w-10 h-10 rounded-md hover:bg-gray-100 transition-colors text-gray-600 hover:text-green-600"
                             aria-label="開啟選單"
                         >
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
