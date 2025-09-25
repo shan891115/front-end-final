@@ -10,7 +10,7 @@
 
     <!-- 主要內容區域 -->
     <section class="flex-grow flex justify-center py-16 bg-green-50">
-      <div class="container mx-auto px-4 max-w-6xl">
+      <div class="container mx-auto px-4 max-w-6xl grid gap-4">
         <h2 class="text-3xl font-light text-center py-4 mb-16 text-emerald-800">獲取專屬旅遊建議</h2>
         
         <!-- 後端連線提示 - 使用更輕量的設計 -->
@@ -18,7 +18,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-teal-500" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
           </svg>
-          <span class="text-sm">
+          <span class="text-sm pl-1">
             <strong>提示：</strong> 若後端伺服器未啟動，系統會自動使用模擬資料。若要使用真實AI服務，請先啟動後端伺服器。
           </span>
         </div>
@@ -125,14 +125,16 @@
                   <option value="food">美食之旅</option>
                 </select>
               </div>
-            </div>            <div class="mb-12" ref="specialRequirementsSection">
+            </div>            
+            <div class="mb-12" ref="specialRequirementsSection">
               <label class="block text-emerald-700 text-sm mb-3 font-medium py-1">特別需求或偏好</label>
               <textarea 
                 ref="specialRequirementsTextarea"
                 v-model="specialRequirements" 
                 class="w-full rounded-lg border border-green-200 px-4 py-3 bg-green-50 text-gray-700 focus:border-emerald-500 focus:ring-0 transition-colors h-32" 
                 placeholder="請輸入您的特別需求或偏好..."
-              ></textarea>              <!-- 快速選取按鈕 -->
+              ></textarea>              
+              <!-- 快速選取按鈕 -->
               <div v-show="showQuickOptions" class="mt-4 flex flex-wrap gap-3 transition-all duration-300 ease-in-out">
                 <span class="text-sm text-emerald-600 font-medium">快速選取：</span>
                 <button
@@ -167,7 +169,7 @@
                 :disabled="isLoading"
               >
                 <span v-if="isLoading" class="flex items-center justify-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white pr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -187,7 +189,7 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm text-red-700">
+                <p class="text-sm text-red-700 pl-1">
                   請先登入以使用AI行程建議功能，將在5秒後跳轉至登入頁面...
                 </p>
               </div>
@@ -199,10 +201,11 @@
             <div class="bg-green-100 p-5 border-b border-green-200 flex justify-between items-center">
               <h4 class="text-xl font-medium text-emerald-800">您的專屬行程建議</h4>
               <div v-if="selectedCountry" class="text-sm text-emerald-700 bg-white px-3 py-1 rounded-full">
-                {{ selectedCountry }} {{ actualDaysCount > 0 ? actualDaysCount : travelDays }}天行程
+                {{ selectedCountry }}{{ actualDaysCount > 0 ? actualDaysCount : travelDays }}天行程
               </div>
             </div>
-            <div class="p-8">              <!-- 行程天數警告 -->
+            <div class="p-8">              
+              <!-- 行程天數警告 -->
               <div v-if="showDaysWarning" class="mb-6 rounded-lg" :class="actualDaysCount > requestedMaxDays ? 'bg-blue-50 border-l-4 border-blue-400' : 'bg-amber-50 border-l-4 border-amber-400'">
                 <div class="flex items-start p-4">
                   <div class="flex-shrink-0">
@@ -245,7 +248,7 @@
                   </div>
                 </div>
               </div>
-              <div class="space-y-4 itinerary-content">
+              <div class="space-y-4 itinerary-content text-gray-700">
                 <div v-html="formattedAiResponse"></div>
               </div>
               <div class="mt-10 flex flex-wrap gap-4 pt-8">
@@ -254,22 +257,24 @@
                   class="px-6 py-3 bg-white border border-green-300 text-emerald-700 rounded-full hover:bg-green-50 transition-colors text-sm font-medium"
                 >
                   修改建議
-                </button>                  <button 
+                </button>                  
+                <button 
                   @click="saveItinerary" 
                   class="px-6 py-3 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-colors text-sm font-medium flex items-center"
                   title="儲存到瀏覽器本地，用於一般查看和管理"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 pr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
                   </svg>
                   儲存到本地瀏覽器
-                </button>                <button 
+                </button>                
+                <button 
                   @click="confirmAndSaveToFirebase"
                   :disabled="isProcessing" 
                   class="px-6 py-3 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition-colors text-sm font-medium flex items-center"
                   title="儲存至雲端資料庫，專供照片牆頁面使用以關聯照片"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 pr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                   </svg>
                   {{ isProcessing ? '儲存中...' : '儲存至雲端 (供照片牆使用)' }}

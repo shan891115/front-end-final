@@ -2,7 +2,8 @@
   <div class="min-h-screen flex flex-col">
     <!-- 頁頭區域 -->
     <section class="flex justify-center bg-gradient-to-r from-green-500 to-teal-600 text-white py-16">
-      <div class="container mx-auto px-4 text-center">        <h2 class="text-4xl font-bold mb-4 pb-2">個人旅遊照片牆</h2>
+      <div class="container mx-auto px-4 text-center">        
+        <h2 class="text-4xl font-bold mb-4 pb-2">個人旅遊照片牆</h2>
         <p class="text-xl mb-4">記錄並分享您的專屬旅行回憶</p>
       </div>
     </section>
@@ -10,7 +11,8 @@
     <!-- 主要內容區域 -->
     <section class="flex-grow flex justify-center py-16 bg-gray-50">
       <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12 pb-4">記錄您的旅途風景</h2>        <!-- 照片分類選項 -->
+        <h2 class="text-3xl font-bold text-center mb-12 pb-4 text-gray-700">記錄您的旅途風景</h2>        
+        <!-- 照片分類選項 -->
         <div class="flex flex-wrap justify-center gap-4 mb-10 pb-4">
           <button 
             v-for="category in photoCategories" 
@@ -26,7 +28,8 @@
         </div>
         
         <!-- 照片管理工具列 -->
-        <div class="flex justify-between items-center mb-6 bg-white rounded-lg p-4 shadow-sm">          <div class="text-sm text-gray-600">
+        <div class="flex justify-between items-center mb-6 bg-white rounded-lg p-4 shadow-sm">          
+          <div class="text-sm text-gray-600">
             <span v-if="photos.length > 0">您的照片牆目前有 {{ photos.length }} 張照片</span>
             <span v-else>您的照片牆目前是空的</span>
           </div>
@@ -37,7 +40,8 @@
               title="管理照片"
             >
               ⚙️ 管理
-            </button>            <button 
+            </button>            
+            <button 
               @click="refreshPhotos" 
               class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
               title="重新整理照片"
@@ -147,7 +151,7 @@
         
         <!-- 上傳照片按鈕 -->
         <div class="mt-16 bg-white rounded-lg shadow-lg p-6">
-          <h3 class="text-2xl font-bold mb-6 text-center">編輯您的照片牆</h3>
+          <h3 class="text-2xl font-bold mb-6 text-center text-gray-700">編輯您的照片牆</h3>
           <p class="text-gray-600 mb-6 text-center">～ 紀錄旅途的精彩時刻和美麗風景 ～</p>
           <div class="text-center py-4">
             <button @click="handleUploadClick" class="px-6 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-700 transition-colors">
