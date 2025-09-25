@@ -190,7 +190,7 @@
               </svg>
               與 AI 助理進一步提問
             </h2>
-            <div class="chat-history" ref="chatHistoryContainer">              
+            <div class="chat-history text-gray-700" ref="chatHistoryContainer">              
               <div v-for="(chat, index) in chatHistory" :key="index" :class="['chat-message', chat.role]">
                 <div v-if="chat.role === 'user'">
                   <p><strong>你:</strong> {{ chat.content }}</p>
@@ -229,7 +229,7 @@
                 <div class="comparison-info">
                   <span class="comparison-date">{{ new Date(comp.timestamp).toLocaleString() }}</span>
                   <span class="comparison-title">
-                    {{ comp.data.analysis?.comparison?.destinations?.map(d => d.title).join(' vs ') || '比較結果' }}
+                    {{ comp.data.analysis?.comparison?.destinations?.map(d => d.title).join(' vs ') || ' 比較結果 ' }}
                   </span>
                 </div>
                 <div class="comparison-actions">
