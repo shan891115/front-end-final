@@ -73,7 +73,7 @@
             <div class="spinner"></div>
           </div>
 
-          <div v-if="parsedComparison && parsedComparison.comparison" class="results-section">
+          <div v-if="parsedComparison && parsedComparison.comparison" class="results-section text-gray-700">
             <h2 class="text-xl font-bold mb-4">比較結果分析</h2>
 
             <div v-if="parsedComparison.comparison.recommendation" class="recommendation-box">
@@ -190,7 +190,8 @@
               </svg>
               與 AI 助理進一步提問
             </h2>
-            <div class="chat-history" ref="chatHistoryContainer">              <div v-for="(chat, index) in chatHistory" :key="index" :class="['chat-message', chat.role]">
+            <div class="chat-history" ref="chatHistoryContainer">              
+              <div v-for="(chat, index) in chatHistory" :key="index" :class="['chat-message', chat.role]">
                 <div v-if="chat.role === 'user'">
                   <p><strong>你:</strong> {{ chat.content }}</p>
                 </div>
