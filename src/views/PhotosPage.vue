@@ -11,7 +11,7 @@
     <!-- 主要內容區域 -->
     <section class="flex-grow flex justify-center py-16 bg-gray-50">
       <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12 pb-4 text-gray-700">記錄您的旅途風景</h2>        
+        <h2 class="text-3xl font-bold text-center mb-12 pb-4 text-gray-600">記錄您的旅途風景</h2>        
         <!-- 照片分類選項 -->
         <div class="flex flex-wrap justify-center gap-4 mb-10 pb-4">
           <button 
